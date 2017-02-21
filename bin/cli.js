@@ -5,3 +5,7 @@ const sc = new SearchCriteria({
   minSurfaceArea: 1,
   zipCodes: ["sdfsdfsd"]
 });
+
+console.log('max price', sc.getMaxPrice());
+console.log('min surface area', sc.getMinSurfaceArea());
+console.log('zip codes', sc.getZipCodes());

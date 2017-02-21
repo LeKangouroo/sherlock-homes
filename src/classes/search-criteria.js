@@ -33,6 +33,21 @@ class SearchCriteria
         throw new SearchCriteriaException(`invalid zip code at index ${index}. Given value = ${zipCode}`);
       }
     });
+    this.maxPrice = opts.maxPrice;
+    this.minSurfaceArea = opts.minSurfaceArea;
+    this.zipCodes = opts.zipCodes;
+  }
+  getMaxPrice()
+  {
+    return this.maxPrice;
+  }
+  getMinSurfaceArea()
+  {
+    return this.minSurfaceArea;
+  }
+  getZipCodes()
+  {
+    return this.zipCodes;
   }
   static isMaxPriceValid(maxPrice)
   {
