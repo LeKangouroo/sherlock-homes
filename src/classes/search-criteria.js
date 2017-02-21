@@ -1,5 +1,6 @@
 const isFinite = require('lodash/isFinite');
 const isNumber = require('lodash/isNumber');
+const isString = require('lodash/isString');
 const SearchCriteriaException = require('./search-criteria-exception');
 
 class SearchCriteria
@@ -21,6 +22,17 @@ class SearchCriteria
     {
       throw new SearchCriteriaException('invalid min surface area');
     }
+    if (!Array.isArray(opts.zipCodes))
+    {
+      throw new SearchCriteriaException('zip codes are not stored in a array');
+    }
+    opts.zipCodes.forEach((zipCode, index) => {
+
+      if (!SearchCriteria.isZipCodeValid(zipCode))
+      {
+        throw new SearchCriteriaException(`invalid zip code at index ${index}. Given value = ${zipCode}`);
+      }
+    });
   }
   static isMaxPriceValid(maxPrice)
   {
@@ -29,6 +41,10 @@ class SearchCriteria
   static isMinSurfaceAreaValid(minSurfaceArea)
   {
     return (isNumber(minSurfaceArea) && isFinite(minSurfaceArea) && minSurfaceArea > 0);
+  }
+  static isZipCodeValid(zipCode)
+  {
+    return (isString(zipCode) && zipCode.length > 0);
   }
 }
 
