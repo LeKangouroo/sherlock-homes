@@ -1,0 +1,19 @@
+{
+  "name": "project-crawler",
+  "version": "1.0.0",
+  "description": "Un crawler web pour de recherches d'offres immobilières",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itadakimas/project-crawler.git"
+  },
+  "author": "Itadakimas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/itadakimas/project-crawler/issues"
+  },
+  "homepage": "https://github.com/itadakimas/project-crawler#readme"
+}
