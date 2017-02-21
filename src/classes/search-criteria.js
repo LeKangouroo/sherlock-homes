@@ -13,12 +13,12 @@ class SearchCriteria
     };
     const opts = Object.assign({}, DEFAULT_OPTIONS, options);
 
-    if (!SearchCriteria.validateMaxPrice(opts.maxPrice))
+    if (!SearchCriteria.isMaxPriceValid(opts.maxPrice))
     {
       throw new SearchCriteriaException('invalid max price option');
     }
   }
-  static validateMaxPrice(maxPrice)
+  static isMaxPriceValid(maxPrice)
   {
     return (isNumber(maxPrice) && isFinite(maxPrice) && maxPrice >= 0);
   }
