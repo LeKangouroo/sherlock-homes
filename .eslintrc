@@ -1,0 +1,27 @@
+{
+  "env": {
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": "2015",
+    "impliedStrict": true,
+    "sourceType": "module"
+  },
+  "rules": {
+    "curly": ["error"],
+    "dot-notation": ["error"],
+    "eqeqeq": ["error"],
+    "no-constant-condition": ["error"],
+    "no-debugger": ["error"],
+    "no-empty-pattern": ["error"],
+    "no-extend-native": ["error"],
+    "no-sparse-arrays": ["error"],
+    "no-unexpected-multiline": ["error"],
+    "no-unreachable": ["error"],
+    "no-unsafe-finally": ["error"],
+    "no-unused-vars": ["error"],
+    "semi": ["error", "always", { "omitLastInOneLineBlock": false }],
+    "use-isnan": ["error"],
+    "valid-typeof": ["error"]
+  }
+}
