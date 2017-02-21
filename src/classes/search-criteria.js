@@ -17,10 +17,18 @@ class SearchCriteria
     {
       throw new SearchCriteriaException('invalid max price option');
     }
+    if (!SearchCriteria.isMinSurfaceAreaValid(opts.minSurfaceArea))
+    {
+      throw new SearchCriteriaException('invalid min surface area');
+    }
   }
   static isMaxPriceValid(maxPrice)
   {
-    return (isNumber(maxPrice) && isFinite(maxPrice) && maxPrice >= 0);
+    return (isNumber(maxPrice) && isFinite(maxPrice) && maxPrice > 0);
+  }
+  static isMinSurfaceAreaValid(minSurfaceArea)
+  {
+    return (isNumber(minSurfaceArea) && isFinite(minSurfaceArea) && minSurfaceArea > 0);
   }
 }
 
