@@ -6,6 +6,10 @@ class FonciaSearchEngine extends SearchEngine
   {
     super(options);
   }
+  findOffers(searchCriteria)
+  {
+    super.findOffers(searchCriteria);
+  }
 }
 
 module.exports = FonciaSearchEngine;

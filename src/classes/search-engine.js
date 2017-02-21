@@ -1,5 +1,6 @@
 const isString = require('lodash/isString');
 const isUrl = require('validator/lib/isURL');
+const SearchCriteria = require('./search-criteria');
 const SearchEngineException = require('./search-engine-exception');
 
 class SearchEngine
@@ -26,6 +27,13 @@ class SearchEngine
     }
     this.name = opts.name;
     this.websiteUrl = opts.websiteUrl;
+  }
+  findOffers(searchCriteria)
+  {
+    if (!(searchCriteria instanceof SearchCriteria))
+    {
+      throw new SearchEngineException('invalid argument. expected an instance of the SearchCriteria');
+    }
   }
   getName()
   {

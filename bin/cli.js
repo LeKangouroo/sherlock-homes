@@ -18,3 +18,5 @@ console.log('zip codes', sc.getZipCodes());
 
 console.log('se name', se.getName());
 console.log('se website url', se.getWebsiteUrl());
+
+se.findOffers(sc);
