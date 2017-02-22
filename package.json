@@ -18,6 +18,7 @@
   "homepage": "https://github.com/itadakimas/project-crawler#readme",
   "dependencies": {
     "lodash": "4.17.4",
+    "phantom": "4.0.0",
     "validator": "6.2.1"
   }
 }
