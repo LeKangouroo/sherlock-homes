@@ -102,9 +102,10 @@ class Offer
   {
     return (isString(zipCode) && zipCode.length > 0);
   }
+  static get types()
+  {
+    return types;
+  }
 }
 
-module.exports = {
-  Offer,
-  types
-};
+module.exports = Offer;
