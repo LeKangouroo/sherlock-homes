@@ -1,6 +1,7 @@
 const isFinite = require('lodash/isFinite');
 const isNumber = require('lodash/isNumber');
 const isString = require('lodash/isString');
+const Offer = require('./offer');
 const SearchCriteriaException = require('./search-criteria-exception');
 
 class SearchCriteria
@@ -10,6 +11,7 @@ class SearchCriteria
     const DEFAULT_OPTIONS = {
       maxPrice: 0,
       minSurfaceArea: 0,
+      offerType: null,
       zipCodes: []
     };
     const opts = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -26,6 +28,10 @@ class SearchCriteria
     {
       throw new SearchCriteriaException('zip codes are not stored in a array');
     }
+    if (!Offer.isTypeValid(opts.offerType))
+    {
+      throw new SearchCriteriaException('invalid offer type');
+    }
     opts.zipCodes.forEach((zipCode, index) => {
 
       if (!SearchCriteria.isZipCodeValid(zipCode))
@@ -35,6 +41,7 @@ class SearchCriteria
     });
     this.maxPrice = opts.maxPrice;
     this.minSurfaceArea = opts.minSurfaceArea;
+    this.offerType = opts.offerType;
     this.zipCodes = opts.zipCodes;
   }
   getMaxPrice()
@@ -44,6 +51,10 @@ class SearchCriteria
   getMinSurfaceArea()
   {
     return this.minSurfaceArea;
+  }
+  getOfferType()
+  {
+    return this.offerType;
   }
   getZipCodes()
   {
