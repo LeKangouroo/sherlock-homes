@@ -9,10 +9,7 @@ const sc = new SearchCriteria({
   zipCodes: ['91300', '75017']
 });
 
-const se = new FonciaSearchEngine({
-  name: 'Foncia',
-  websiteUrl: 'http://sfsdfsdfsd.com'
-});
+const se = new FonciaSearchEngine();
 
 console.log('max price', sc.getMaxPrice());
 console.log('min surface area', sc.getMinSurfaceArea());

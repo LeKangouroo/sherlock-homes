@@ -3,9 +3,12 @@ const SearchEngine = require('./search-engine');
 
 class FonciaSearchEngine extends SearchEngine
 {
-  constructor(options)
+  constructor()
   {
-    super(options);
+    super({
+      name: 'Foncia',
+      websiteUrl: 'https://fr.foncia.com'
+    });
   }
   findOffers(searchCriteria)
   {
