@@ -1,7 +1,5 @@
-const page = require('webpage').create();
+const Casper = require('./casper');
 const SearchEngine = require('./search-engine');
-
-// TODO: create a wrapper class for phantomjs (see https://www.npmjs.com/package/phantomjs)
 
 class FonciaSearchEngine extends SearchEngine
 {
@@ -13,10 +11,9 @@ class FonciaSearchEngine extends SearchEngine
   {
     super.findOffers(searchCriteria);
 
-    page.open(this.getWebsiteUrl(), (status) => {
-
-      console.log('page opened with status', status);
-    });
+    Casper.runScript('foncia-rent-offers')
+      .then((stdout) => console.log('output', stdout))
+      .catch((stderr) => console.error('error', stderr));
   }
 }
 
