@@ -11,7 +11,12 @@ class FonciaSearchEngine extends SearchEngine
   {
     super.findOffers(searchCriteria);
 
-    Casper.runScript('foncia-rent-offers')
+    const args = [
+      `--search-criteria=${JSON.stringify(searchCriteria)}`,
+      `--search-engine=${JSON.stringify(this)}`
+    ];
+
+    Casper.runScript('foncia-rent-offers', args)
       .then((stdout) => console.log('output', stdout))
       .catch((stderr) => console.error('error', stderr));
   }
