@@ -15,21 +15,26 @@ casper.echo('search engine');
 casper.echo(JSON.stringify(searchEngine, null, 2));
 casper.start(searchEngine.websiteUrl);
 casper.thenClick('.Btn--location');
-casper.then(function() {
+casper.eachThen(searchCriteria.zipCodes, function(response) {
 
-  this.sendKeys('#searchForm_localisation_tag', searchCriteria.zipCodes[1], { keepFocus: true });
+  const zipCode = response.data;
+  const searchFieldSelector = '#searchForm_localisation_tag';
+
+  this.sendKeys(searchFieldSelector, zipCode, { keepFocus: true });
+  this.waitUntilVisible('.ui-autocomplete .ui-menu-item:first-child', function() {
+
+    this.sendKeys(searchFieldSelector, casper.page.event.key.Down);
+    this.sendKeys(searchFieldSelector, casper.page.event.key.Enter);
+  });
 });
-casper.waitUntilVisible('.ui-autocomplete .ui-menu-item:first-child', function() {
+casper.then(function() {
 
   var value = casper.evaluate(function() {
 
-    // TODO: trigger arrow up and enter key to simulate user interaction
-
-    return document.querySelector('.ui-autocomplete .ui-menu-item:first-child').textContent;
-    // return document.querySelector('#searchForm_localisation').value;
+    return document.querySelector('#searchForm_localisation').value;
   });
 
-  console.log('value', value);
+  console.log('value5', value);
 });
 casper.then(function() {
 
