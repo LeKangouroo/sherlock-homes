@@ -1,6 +1,7 @@
 const Casper = require('./casper');
 const Offer = require('./offer');
 const SearchEngine = require('./search-engine');
+const SearchEngineException = require('./search-criteria-exception');
 
 class FonciaSearchEngine extends SearchEngine
 {
@@ -15,15 +16,24 @@ class FonciaSearchEngine extends SearchEngine
   {
     super.findOffers(searchCriteria);
 
-    const args = [
-      `--offer-types=${JSON.stringify(Offer.types)}`,
-      `--search-criteria=${JSON.stringify(searchCriteria)}`,
-      `--search-engine=${JSON.stringify(this)}`
-    ];
+    return new Promise((resolve, reject) => {
 
-    Casper.runScript('foncia-rent-offers', args)
-      .then((stdout) => console.log('output', stdout))
-      .catch((stderr) => console.error('error', stderr));
+      const args = [
+        `--offer-types=${JSON.stringify(Offer.types)}`,
+        `--search-criteria=${JSON.stringify(searchCriteria)}`,
+        `--search-engine=${JSON.stringify(this)}`
+      ];
+
+      Casper.runScript('foncia-rent-offers', args)
+      .then((stdout) => {
+
+        resolve(JSON.parse(stdout));
+      })
+      .catch((stderr) => {
+
+        reject(new SearchEngineException(`Error during Foncia offers searching: ${stderr}`));
+      });
+    });
   }
 }
 
