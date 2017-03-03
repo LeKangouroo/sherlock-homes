@@ -1,7 +1,5 @@
 const casper = require('casper').create({
 
-  verbose: true,
-  logLevel: "debug",
   onError: function(casper, msg, stackTrace) {
 
     casper.echo(msg);
@@ -88,22 +86,54 @@ casper.then(function() {
 
     var offers = casper.evaluate(function(selector) {
 
-      // var offers = [];
+      const REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
+      const REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
+
+      var offers = [];
       var elements = document.querySelectorAll(selector);
       var count = elements.length;
 
-      return count;
+      for (var i = 0; i < count; i++)
+      {
+        var o = elements[i];
+        var a = document.createElement('a');
 
-      // for (var i = 0; i < count; i++)
-      // {
-      //   offers.push({
-      //     foo: 'bar'
-      //   });
-      // }
-      // return offers;
+        a.href = window.location.href;
+        a.pathname = document.querySelector('.TeaserOffer-title a').getAttribute('href');
+
+        var agencyFees = Number(o.querySelector('.TeaserOffer-price-mentions')
+          .textContent
+          .match(REGEXP_AGENCY_FEES)[1]);
+
+        var price = Number(o.querySelector('*[data-behat="prixVenteDesBiens"]')
+          .textContent
+          .trim()
+          .replace('€C.C*', '')
+          .trim());
+
+        var surfaceArea = Number(o.querySelector('*[data-behat="surfaceDesBiens"]')
+          .textContent
+          .trim()
+          .replace('m2', '')
+          .trim());
+
+        var zipCode = o.querySelector('.TeaserOffer-loc')
+          .textContent
+          .match(REGEXP_ZIP_CODE)[1];
+
+        offers.push({
+          agencyFees: agencyFees,
+          price: price,
+          surfaceArea: surfaceArea,
+          type: null,
+          url: a.href,
+          zipCode: zipCode
+        });
+      }
+      return offers;
 
     }, offerSelector);
-    console.log('offers count', offers);
+    console.log('offers count', JSON.stringify(offers, null, 2));
   }
   else
   {
