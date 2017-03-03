@@ -3,8 +3,8 @@ const FonciaSearchEngine = require('../src/classes/foncia-search-engine');
 const Offer = require('../src/classes/offer');
 
 const sc = new SearchCriteria({
-  maxPrice: 20,
-  minSurfaceArea: 1,
+  maxPrice: 800,
+  minSurfaceArea: 10,
   offerType: Offer.types.RENT,
   zipCodes: ['91300', '75017']
 });

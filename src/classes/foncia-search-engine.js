@@ -1,4 +1,5 @@
 const Casper = require('./casper');
+const Offer = require('./offer');
 const SearchEngine = require('./search-engine');
 
 class FonciaSearchEngine extends SearchEngine
@@ -15,6 +16,7 @@ class FonciaSearchEngine extends SearchEngine
     super.findOffers(searchCriteria);
 
     const args = [
+      `--offer-types=${JSON.stringify(Offer.types)}`,
       `--search-criteria=${JSON.stringify(searchCriteria)}`,
       `--search-engine=${JSON.stringify(this)}`
     ];

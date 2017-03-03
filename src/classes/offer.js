@@ -6,6 +6,7 @@ const OfferException = require('./offer-exception');
 const values = require('lodash/values');
 
 const types = {
+  PURCHASE: 101,
   RENT: 100
 };
 
