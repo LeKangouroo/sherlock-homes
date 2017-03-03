@@ -84,7 +84,7 @@ casper.then(function() {
   {
     console.log('offer(s) found');
 
-    var offers = casper.evaluate(function(selector) {
+    var offers = casper.evaluate(function(selector, types) {
 
       const REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
       const REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
@@ -117,6 +117,9 @@ casper.then(function() {
           .replace('m2', '')
           .trim());
 
+        // TODO: add support of multiple offer types
+        var type = types.RENT;
+
         var zipCode = o.querySelector('.TeaserOffer-loc')
           .textContent
           .match(REGEXP_ZIP_CODE)[1];
@@ -125,14 +128,14 @@ casper.then(function() {
           agencyFees: agencyFees,
           price: price,
           surfaceArea: surfaceArea,
-          type: null,
+          type: type,
           url: a.href,
           zipCode: zipCode
         });
       }
       return offers;
 
-    }, offerSelector);
+    }, offerSelector, offerTypes);
     console.log('offers count', JSON.stringify(offers, null, 2));
   }
   else
