@@ -1,23 +1,9 @@
-const casper = require('casper').create({
-
-  onError: function(casper, msg, stackTrace) {
-
-    casper.echo(msg);
-    casper.echo(stackTrace);
-  }
-});
-
+const casper = require('casper').create();
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 
-// Prints CLI options to stdout
-casper.echo('search criteria');
-casper.echo(JSON.stringify(searchCriteria, null, 2));
-casper.echo('search engine');
-casper.echo(JSON.stringify(searchEngine, null, 2));
-casper.echo('offer types');
-casper.echo(JSON.stringify(offerTypes, null, 2));
+var offers;
 
 // Loads search engine's website url
 casper.start(searchEngine.websiteUrl);
@@ -58,33 +44,20 @@ casper.then(function() {
   this.fillSelectors('#form_search_offer', values, true);
 });
 
+// Waits for the results page to be loaded
 casper.then(function() {
 
-  this.waitForUrl(/location\/.+$/, function(){
-
-    this.echo('url loaded');
-  });
+  this.waitForUrl(/location\/.+$/);
 });
 
-casper.then(function() {
-
-  var url = this.evaluate(function() {
-
-    return window.location.href;
-  });
-
-  console.log('url', url);
-});
-
+// Scraps informations
 casper.then(function() {
 
   const offerSelector = '.TeaserOffer';
 
   if (this.visible(offerSelector))
   {
-    console.log('offer(s) found');
-
-    var offers = casper.evaluate(function(selector, types) {
+    offers = casper.evaluate(function(selector, types) {
 
       const REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
       const REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
@@ -136,16 +109,17 @@ casper.then(function() {
       return offers;
 
     }, offerSelector, offerTypes);
-    console.log('offers count', JSON.stringify(offers, null, 2));
   }
   else
   {
-    console.log('no offer found');
+    offers = [];
   }
 });
 
+// Outputs offers to stdout
 casper.then(function() {
 
-  this.echo(this.getTitle());
+  this.echo(JSON.stringify(offers));
 });
+
 casper.run();
