@@ -1,29 +1,28 @@
 const SearchCriteria = require('../src/classes/search-criteria');
 const FonciaSearchEngine = require('../src/classes/foncia-search-engine');
 const Offer = require('../src/classes/offer');
+const OrpiSearchEngine = require('../src/classes/orpi-search-engine');
 
 const sc = new SearchCriteria({
   maxPrice: 800,
-  minSurfaceArea: 10,
+  minSurfaceArea: 35,
   offerType: Offer.types.RENT,
   zipCodes: ['91300', '75017']
 });
 
-const se = new FonciaSearchEngine();
+const se1 = new FonciaSearchEngine();
+const se2 = new OrpiSearchEngine();
 
-console.log('max price', sc.getMaxPrice());
-console.log('min surface area', sc.getMinSurfaceArea());
-console.log('zip codes', sc.getZipCodes());
+const search = Promise.all([
+  // se1.findOffers(sc),
+  se2.findOffers(sc)
+]);
 
-console.log('se name', se.getName());
-console.log('se website url', se.getWebsiteUrl());
+search.then((offers) => {
 
-se.findOffers(sc)
-  .then((offers) => {
+  console.log(offers);
+})
+.catch((error) => {
 
-    console.log(offers);
-  })
-  .catch((error) => {
-
-    console.error(error);
-  });
+  console.error(error);
+});
