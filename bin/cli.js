@@ -4,10 +4,31 @@ const Offer = require('../src/classes/offer');
 const OrpiSearchEngine = require('../src/classes/orpi-search-engine');
 
 const sc = new SearchCriteria({
-  maxPrice: 800,
-  minSurfaceArea: 35,
+  maxPrice: 780,
+  minSurfaceArea: 20,
   offerType: Offer.types.RENT,
-  zipCodes: ['91300', '75017']
+  zipCodes: [
+    '75001',
+    '75002',
+    '75003',
+    '75004',
+    '75005',
+    '75006',
+    '75007',
+    '75008',
+    '75009',
+    '75010',
+    '75011',
+    '75012',
+    '75013',
+    '75014',
+    '75015',
+    '75016',
+    '75017',
+    '75018',
+    '75019',
+    '75020'
+  ]
 });
 
 const se1 = new FonciaSearchEngine();
@@ -20,7 +41,9 @@ const search = Promise.all([
 
 search.then((offers) => {
 
-  console.log(offers);
+  offers = [].concat.apply([], offers);
+
+  console.log(JSON.stringify(offers));
 })
 .catch((error) => {
 
