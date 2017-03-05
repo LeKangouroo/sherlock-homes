@@ -14,7 +14,7 @@ const se1 = new FonciaSearchEngine();
 const se2 = new OrpiSearchEngine();
 
 const search = Promise.all([
-  // se1.findOffers(sc),
+  se1.findOffers(sc),
   se2.findOffers(sc)
 ]);
 

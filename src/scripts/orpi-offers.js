@@ -1,23 +1,11 @@
 const casper = require('casper').create({
-
-  // logLevel: 'debug',
-  // verbose: true,
+  pageSettings: {
+    loadImages: false,
+    loadPlugins: false
+  },
   viewportSize: {
     width: 1920,
     height: 1080
-  },
-  onError: function(casper, msg, backtrace) {
-
-    console.log(msg);
-    console.log(backtrace);
-  },
-  onLoadError: function(casper, requestUrl, status) {
-
-    console.log('requestUrl', requestUrl, 'status', status);
-  },
-  onTimeout: function(timeout) {
-
-    console.log('timed out', timeout);
   }
 });
 
@@ -26,6 +14,7 @@ const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 
 var offers;
+var offersUrls;
 var url = searchEngine.websiteUrl;
 
 // Goes to the section of the website corresponding to the offer type
@@ -82,163 +71,72 @@ casper
 // Submit search form
 casper.thenClick('.searchbar-item .button-search-searchbar');
 
+// Waits for the results page to be loaded
 casper.then(function() {
 
-  this.capture('output.png');
+  this.waitForUrl(/recherche\/.+$/);
 });
 
-// casper.waitFor(
-//   function() {
-//
-//     return this.evaluate(function() {
-//
-//       return document.querySelectorAll('.searchbar-item').length > 0;
-//     });
-//   },
-//   function() {
-//
-//     console.log('ready');
-//   },
-//   function() {
-//
-//     console.log('timeout');
-//   },
-//   10000
-// );
+// Scraps offers informations
+casper.then(function() {
+
+  const offerSelector = '.resultLayout-estateList .column';
+
+  if (this.visible(offerSelector))
+  {
+    offers = [];
+    offersUrls = this.evaluate(function(selector) {
+
+      var urls = [];
+      var elements = document.querySelectorAll(selector);
+      var count = elements.length;
+
+      for (var i = 0; i < count; i++)
+      {
+        var el = elements[i];
+
+        urls.push(el.querySelector('.estateItem').href);
+      }
+      return urls;
+
+    }, offerSelector);
+
+    this.each(offersUrls, function(casper, link) {
+
+      casper.thenOpen(link, function() {
+
+        offers.push(casper.evaluate(function(searchCriteria){
+
+          var REGEXP_AGENCY_FEES = /Honoraires TTC locataire : ([0-9]+) €/;
+          var REGEXP_PRICE = /([0-9]+) €/;
+          var REGEXP_SURFACE_AREA = /([0-9]+) m2/;
+          var REGEXP_ZIPCODE = new RegExp('((' + searchCriteria.zipCodes.join('|') + '))');
+
+          var locationDetails = document.querySelector('.estateOffer-location').textContent;
+          var offerDetails = document.querySelector('.estate-characteristic-right').textContent;
+          var priceDetails = document.querySelector('.estateOffer-price').textContent;
+
+          return {
+            agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1]),
+            price: Number(priceDetails.match(REGEXP_PRICE)[1]),
+            surfaceArea: Number(locationDetails.match(REGEXP_SURFACE_AREA)[1]),
+            type: searchCriteria.offerType,
+            url: window.location.href,
+            zipCode: window.location.href.match(REGEXP_ZIPCODE)[1]
+          };
+        }, searchCriteria));
+      });
+    });
+  }
+  else
+  {
+    offers = [];
+  }
+});
 
 casper.then(function() {
 
-  this.echo(this.getTitle());
+  this.echo(JSON.stringify(offers));
 });
-
-// casper.then(function() {
-//
-//   var isSearchBarVisible = function() {
-//
-//     return document.querySelectorAll('.searchbar-item').length > 0;
-//   };
-//
-//   this.waitFor(isSearchBarVisible, function() {
-//
-//     casper.then(function() {
-//
-//       var count = this.evaluate(function() {
-//
-//         return document.querySelectorAll('.searchbar-item').length;
-//       });
-//       console.log('count', count);
-//     });
-//
-//     casper.then(function() {
-//
-//       console.log('done');
-//     });
-//   });
-// });
-
-
-// Selects search area
-// casper.eachThen(searchCriteria.zipCodes, function(response) {
-//
-//   const zipCode = response.data;
-//   const searchFieldSelector = '#searchForm_localisation_tag';
-//
-//   this.sendKeys(searchFieldSelector, zipCode, { keepFocus: true });
-//   this.waitUntilVisible('.ui-autocomplete .ui-menu-item:first-child', function() {
-//
-//     this.sendKeys(searchFieldSelector, casper.page.event.key.Down);
-//     this.sendKeys(searchFieldSelector, casper.page.event.key.Enter);
-//   });
-// });
-//
-// // Selects other criteria
-// casper.then(function() {
-//
-//   // TODO: add support of property types in the SearchCriteria class (i.e. flat, house, garage, etc.)
-//   const values = {
-//     '#searchForm_type_bien_0': true,
-//     '#searchForm_surface_min': searchCriteria.minSurfaceArea,
-//     '#searchForm_prix_max': searchCriteria.maxPrice
-//   };
-//   this.fillSelectors('#form_search_offer', values, true);
-// });
-//
-// // Waits for the results page to be loaded
-// casper.then(function() {
-//
-//   this.waitForUrl(/location\/.+$/);
-// });
-//
-// // Scraps informations
-// casper.then(function() {
-//
-//   const offerSelector = '.TeaserOffer';
-//
-//   if (this.visible(offerSelector))
-//   {
-//     offers = casper.evaluate(function(selector, types) {
-//
-//       const REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
-//       const REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
-//
-//       var offers = [];
-//       var elements = document.querySelectorAll(selector);
-//       var count = elements.length;
-//
-//       for (var i = 0; i < count; i++)
-//       {
-//         var o = elements[i];
-//         var a = document.createElement('a');
-//
-//         a.href = window.location.href;
-//         a.pathname = document.querySelector('.TeaserOffer-title a').getAttribute('href');
-//
-//         var agencyFees = Number(o.querySelector('.TeaserOffer-price-mentions')
-//           .textContent
-//           .match(REGEXP_AGENCY_FEES)[1]);
-//
-//         var price = Number(o.querySelector('*[data-behat="prixVenteDesBiens"]')
-//           .textContent
-//           .trim()
-//           .replace('€C.C*', '')
-//           .trim());
-//
-//         var surfaceArea = Number(o.querySelector('*[data-behat="surfaceDesBiens"]')
-//           .textContent
-//           .trim()
-//           .replace('m2', '')
-//           .trim());
-//
-//         // TODO: add support of multiple offer types
-//         var type = types.RENT;
-//
-//         var zipCode = o.querySelector('.TeaserOffer-loc')
-//           .textContent
-//           .match(REGEXP_ZIP_CODE)[1];
-//
-//         offers.push({
-//           agencyFees: agencyFees,
-//           price: price,
-//           surfaceArea: surfaceArea,
-//           type: type,
-//           url: a.href,
-//           zipCode: zipCode
-//         });
-//       }
-//       return offers;
-//
-//     }, offerSelector, offerTypes);
-//   }
-//   else
-//   {
-//     offers = [];
-//   }
-// });
-//
-// // Outputs offers to stdout
-// casper.then(function() {
-//
-//   this.echo(JSON.stringify(offers));
-// });
 
 casper.run();
