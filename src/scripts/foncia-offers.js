@@ -1,4 +1,13 @@
-const casper = require('casper').create();
+const casper = require('casper').create({
+  pageSettings: {
+    loadImages: false,
+    loadPlugins: false
+  },
+  viewportSize: {
+    width: 1920,
+    height: 1080
+  }
+});
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
@@ -72,7 +81,7 @@ casper.then(function() {
         var a = document.createElement('a');
 
         a.href = window.location.href;
-        a.pathname = document.querySelector('.TeaserOffer-title a').getAttribute('href');
+        a.pathname = o.querySelector('.TeaserOffer-title a').getAttribute('href');
 
         var agencyFees = Number(o.querySelector('.TeaserOffer-price-mentions')
           .textContent
