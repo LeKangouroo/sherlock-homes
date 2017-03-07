@@ -12,7 +12,7 @@ const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 
-var offers;
+var offers = [];
 
 // Loads search engine's website url
 casper.start(searchEngine.websiteUrl);
@@ -66,62 +66,80 @@ casper.then(function() {
 
   if (this.visible(offerSelector))
   {
-    offers = casper.evaluate(function(selector, types) {
+    var urls = this.evaluate(function(offerSelector) {
 
-      const REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
-      const REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
+      var offers = document.querySelectorAll(offerSelector);
+      var length = offers.length;
+      var urls = [];
 
-      var offers = [];
-      var elements = document.querySelectorAll(selector);
-      var count = elements.length;
-
-      for (var i = 0; i < count; i++)
+      for (var i = 0; i < length; i++)
       {
-        var o = elements[i];
+        var o = offers[i];
         var a = document.createElement('a');
+        var el = o.querySelector('.TeaserOffer-title a');
 
-        a.href = window.location.href;
-        a.pathname = o.querySelector('.TeaserOffer-title a').getAttribute('href');
-
-        var agencyFees = Number(o.querySelector('.TeaserOffer-price-mentions')
-          .textContent
-          .match(REGEXP_AGENCY_FEES)[1]);
-
-        var price = Number(o.querySelector('*[data-behat="prixVenteDesBiens"]')
-          .textContent
-          .trim()
-          .replace('€C.C*', '')
-          .trim());
-
-        var surfaceArea = Number(o.querySelector('*[data-behat="surfaceDesBiens"]')
-          .textContent
-          .trim()
-          .replace('m2', '')
-          .trim());
-
-        // TODO: add support of multiple offer types
-        var type = types.RENT;
-
-        var zipCode = o.querySelector('.TeaserOffer-loc')
-          .textContent
-          .match(REGEXP_ZIP_CODE)[1];
-
-        offers.push({
-          agencyFees: agencyFees,
-          price: price,
-          surfaceArea: surfaceArea,
-          type: type,
-          url: a.href,
-          zipCode: zipCode
-        });
+        if (el && el.href)
+        {
+          urls.push(el.href);
+        }
       }
-      return offers;
+      return urls;
 
-    }, offerSelector, offerTypes);
-  }
-  else
-  {
-    offers = [];
+    }, offerSelector);
+
+    this.each(urls, function(casper, url) {
+
+      casper.thenOpen(url, function() {
+
+        var offer = casper.evaluate(function(types) {
+
+          var REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
+          var REGEXP_IS_FURNISHED = /\bmeubl(é|e)\b/i;
+          var REGEXP_PRICE = /([0-9]+\.[0-9]*)/;
+          var REGEXP_SURFACE_AREA = /([0-9]+) m2/;
+          var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
+
+          var agencyFees = Number(document.querySelector('.OfferTop-mentions')
+            .textContent
+            .match(REGEXP_AGENCY_FEES)[1]);
+
+          var isFurnished = REGEXP_IS_FURNISHED.test(document.querySelector('.OfferDetails-content').textContent);
+
+          var price = Number(document.querySelector('.OfferTop-price')
+            .textContent
+            .trim()
+            .match(REGEXP_PRICE)[1]);
+
+          var surfaceArea = Number(document.querySelector('.OfferTop-col--right')
+            .textContent
+            .trim()
+            .match(REGEXP_SURFACE_AREA)[1]);
+
+          // TODO: add support of multiple offer types
+          var type = types.RENT;
+
+          var zipCode = document.querySelector('.OfferTop-loc')
+            .textContent
+            .match(REGEXP_ZIP_CODE)[1];
+
+          return {
+            agencyFees: agencyFees,
+            isFurnished: isFurnished,
+            price: price,
+            surfaceArea: surfaceArea,
+            type: type,
+            url: window.location.href,
+            zipCode: zipCode
+          };
+
+        }, offerTypes);
+
+        if (offer)
+        {
+          offers.push(offer);
+        }
+      });
+    });
   }
 });
 
