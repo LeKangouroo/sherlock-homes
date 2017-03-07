@@ -16,6 +16,7 @@ class Offer
   {
     const DEFAULT_OPTIONS = {
       agencyFees: null,
+      isFurnished: null,
       price: null,
       surfaceArea: null,
       type: null,
@@ -27,6 +28,10 @@ class Offer
     if (!Offer.areAgencyFeesValid(opts.agencyFees))
     {
       throw new OfferException('invalid agency fees');
+    }
+    if (!Offer.isFurnishedFlagValid(opts.isFurnished))
+    {
+      throw new OfferException('invalid isFurnished flag');
     }
     if (!Offer.isPriceValid(opts.price))
     {
@@ -49,6 +54,7 @@ class Offer
       throw new OfferException('invalid zip code');
     }
     this.agencyFees = opts.agencyFees;
+    this.isFurnished = opts.isFurnished;
     this.price = opts.price;
     this.surfaceArea = opts.surfaceArea;
     this.type = opts.type;
@@ -79,9 +85,17 @@ class Offer
   {
     return this.zipCode;
   }
+  isFurnished()
+  {
+    return this.isFurnished;
+  }
   static areAgencyFeesValid(agencyFees)
   {
     return (isNumber(agencyFees) && isFinite(agencyFees) && agencyFees >= 0);
+  }
+  static isFurnishedFlagValid(isFurnished)
+  {
+    return (typeof isFurnished === 'boolean');
   }
   static isPriceValid(price)
   {

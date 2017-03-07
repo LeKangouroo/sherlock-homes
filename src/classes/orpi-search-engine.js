@@ -27,7 +27,7 @@ class OrpiSearchEngine extends SearchEngine
       Casper.runScript('orpi-offers', args)
       .then((stdout) => {
 
-        resolve(JSON.parse(stdout));
+        resolve(JSON.parse(stdout).map((o, i) => new Offer(o)));
       })
       .catch((stderr) => {
 
