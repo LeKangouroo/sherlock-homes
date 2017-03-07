@@ -27,7 +27,7 @@ class FonciaSearchEngine extends SearchEngine
       Casper.runScript('foncia-offers', args)
       .then((stdout) => {
 
-        resolve(JSON.parse(stdout));
+        resolve(JSON.parse(stdout).map((o, i) => new Offer(o)));
       })
       .catch((stderr) => {
 
