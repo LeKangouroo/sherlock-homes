@@ -1,5 +1,5 @@
 {
-  "name": "project-crawler",
+  "name": "sherlock-homes",
   "version": "1.0.0",
   "description": "Un crawler web pour de recherches d'offres immobilières",
   "main": "index.js",
