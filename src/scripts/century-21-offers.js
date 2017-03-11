@@ -38,6 +38,16 @@ casper.waitUntilVisible('.token-input-list-facebook', function() {
   });
 });
 
+// Selects minimum surface area
+casper.then(function() {
+
+  this.evaluate(function(minSurfaceArea) {
+
+    $('#slider-id_surface_min').slider({ value: minSurfaceArea })
+
+  }, searchCriteria.minSurfaceArea);
+});
+
 casper.then(function() {
 
   this.capture('output.png');
