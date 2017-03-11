@@ -48,6 +48,16 @@ casper.then(function() {
   }, searchCriteria.minSurfaceArea);
 });
 
+// Selects maximum price
+casper.then(function() {
+
+  this.evaluate(function(maxPrice) {
+
+    $('#slider-id_budget_max').slider({ value: maxPrice })
+
+  }, searchCriteria.maxPrice);
+});
+
 casper.then(function() {
 
   this.capture('output.png');
