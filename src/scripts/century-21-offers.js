@@ -1,6 +1,6 @@
 const casper = require('casper').create({
   pageSettings: {
-    // loadImages: false,
+    loadImages: false,
     loadPlugins: false
   },
   viewportSize: {
@@ -12,6 +12,7 @@ const casper = require('casper').create({
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
+const zipCodes = JSON.parse(casper.cli.options['zip-codes']);
 
 var offers;
 var offersUrls;
@@ -29,38 +30,18 @@ casper.waitForSelector('#blocRECHERCHE');
 casper.thenClick('#btn-id_types_biens_1');
 
 // Selects zip codes
-casper.eachThen(searchCriteria.zipCodes, function(response) {
+casper.waitUntilVisible('.token-input-list-facebook', function() {
 
-  var zipCode = response.data;
-  var searchFieldSelector = '#token-input-id_localisation';
-  var suggestionSelector = '.token-input-dropdown-facebook ul li:first-child';
+  casper.eachThen(zipCodes, function(response) {
 
-  this.sendKeys(searchFieldSelector, zipCode, { keepFocus: true });
-
-  // TODO: select zip code once typed
-
-  this.waitForSelector(suggestionSelector, function() {
-
-    this.capture('output.png');
-
-    this.thenClick(suggestionSelector);
-
-      // this.sendKeys(searchFieldSelector, casper.page.event.key.Enter);
-    this.capture('output2.png');
-    // this.sendKeys(searchFieldSelector, casper.page.event.key.Down);
-    // this.debugHTML();
-
-
-  }, function() {
-
-    console.log('timed out');
+    this.evaluate(function(zipCode) { $('#id_localisation').tokenInput('add', zipCode) }, response.data);
   });
 });
 
-// casper.then(function() {
-//
-//   this.capture('output.png');
-// });
+casper.then(function() {
+
+  this.capture('output.png');
+});
 
 casper.then(function() {
 

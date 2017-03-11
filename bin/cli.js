@@ -9,7 +9,8 @@ const sc = new SearchCriteria({
   minSurfaceArea: 20,
   offerType: Offer.types.RENT,
   zipCodes: [
-    '91300'
+    '91300',
+    '75017'
   ]
 });
 
