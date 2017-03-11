@@ -61,44 +61,24 @@ casper.then(function() {
 // Submits search form
 casper.thenClick('#btnRECHERCHE');
 
-
-function getOfferLinks(linksSelector, nextButtonSelector)
-{
-  var newLinks = casper.evaluate(
-
-    function(selector) {
-
-      var anchors = document.querySelectorAll(selector);
-      var length = anchors.length;
-      var urls = [];
-
-      for (var i = 0; i < length; i++)
-      {
-        urls.push(anchors[i].href);
-      }
-      return urls;
-    },
-    linksSelector
-  );
-
-  offersLinks = offersLinks.concat(newLinks);
-  return;
-  if (casper.visible(nextButtonSelector))
-  {
-    casper.thenClick(nextButtonSelector);
-    casper.waitUntilVisible(linksSelector);
-    casper.then(function() {
-
-      getOfferLinks(linksSelector, nextButtonSelector);
-    });
-  }
-}
-
+// Scraps offers links
 casper.then(function() {
 
-  getOfferLinks('.annonce .zone-text-loupe a', '.btnSUIV_PREC.suivant a');
+  offersLinks = casper.evaluate(function() {
+
+    var anchors = document.querySelectorAll('.annonce .zone-text-loupe a');
+    var length = anchors.length;
+    var urls = [];
+
+    for (var i = 0; i < length; i++)
+    {
+      urls.push(anchors[i].href);
+    }
+    return urls;
+  });
 });
 
+// Scraps offers data
 casper.then(function() {
 
   casper.each(offersLinks, function(casper, link) {

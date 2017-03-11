@@ -25,14 +25,14 @@ class OrpiSearchEngine extends SearchEngine
       ];
 
       Casper.runScript('orpi-offers', args)
-      .then((stdout) => {
+        .then((stdout) => {
 
-        resolve(JSON.parse(stdout).map((o, i) => new Offer(o)));
-      })
-      .catch((stderr) => {
+          resolve(JSON.parse(stdout).map((o, i) => new Offer(o)));
+        })
+        .catch((stderr) => {
 
-        reject(new SearchEngineException(`Error during ORPI offers searching: ${stderr}`));
-      });
+          reject(new SearchEngineException(`Error during ORPI offers searching: ${stderr}`));
+        });
     });
   }
 }

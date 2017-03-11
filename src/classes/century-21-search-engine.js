@@ -44,15 +44,20 @@ class Century21SearchEngine extends SearchEngine
             `--zip-codes=${JSON.stringify(zipCodes)}`
           ];
 
-          Casper.runScript('century-21-offers', args).then((stdout) => {
+          Casper.runScript('century-21-offers', args)
+            .then((stdout) => {
 
-            // TODO: remove the console log and uncomment the commented line
-            console.log(stdout);
-            // resolve(JSON.parse(stdout).map((o, i) => new Offer(o)));
-          })
-          .catch((stderr) => reject(new SearchEngineException(`Error during Century 21 offers searching: ${stderr}`)));
+              resolve(JSON.parse(stdout).map((o, i) => new Offer(o)));
+            })
+            .catch((stderr) => {
+
+              reject(new SearchEngineException(`Error during Century 21 offers searching: ${stderr}`));
+            });
         })
-        .catch((error) => reject(new SearchEngineException(`error while retrieving zip codes autocomplete data: ${error.toString()}`)));
+        .catch((error) => {
+
+          reject(new SearchEngineException(`error while retrieving zip codes autocomplete data: ${error.toString()}`))
+        });
     });
   }
 }
