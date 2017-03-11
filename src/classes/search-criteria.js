@@ -70,7 +70,7 @@ class SearchCriteria
   }
   static isZipCodeValid(zipCode)
   {
-    return (isString(zipCode) && zipCode.length > 0);
+    return (isString(zipCode) && zipCode.length === 5);
   }
 }
 
