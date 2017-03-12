@@ -1,56 +1,87 @@
+const argv = require('../usage/usage').argv;
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
-const SearchCriteria = require('../../src/classes/search-criteria');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
+const Hapi = require('hapi');
 const Offer = require('../../src/classes/offer');
 const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
+const SearchCriteria = require('../../src/classes/search-criteria');
 
-const sc = new SearchCriteria({
-  maxPrice: 800,
-  minSurfaceArea: 10,
-  offerType: Offer.types.RENT,
-  zipCodes: [
-    '75001',
-    '75002',
-    '75003',
-    '75004',
-    '75005',
-    '75006',
-    '75007',
-    '75008',
-    '75009',
-    '75010',
-    '75011',
-    '75012',
-    '75013',
-    '75014',
-    '75015',
-    '75016',
-    '75017',
-    '75018',
-    '75019',
-    '75020'
-  ]
+const server = new Hapi.Server();
+
+server.connection({
+  host: argv.host,
+  port: argv.port
 });
 
-const se1 = new FonciaSearchEngine();
-const se2 = new OrpiSearchEngine();
-const se3 = new Century21SearchEngine();
+server.start((err) => {
 
-const search = Promise.all([
-  se1.findOffers(sc),
-  se2.findOffers(sc),
-  se3.findOffers(sc)
-]);
+  if (err)
+  {
+    throw err;
+  }
+  console.log(`[Sherlock] Server running at: ${server.info.uri}`);
+});
 
-search.then((offers) => {
+server.route({
 
-  offers = [].concat.apply([], offers);
+  method: 'GET',
+  path: '/',
+  handler: (request, reply) => {
 
-  console.log(JSON.stringify(offers));
-  process.exit(0);
-})
-.catch((error) => {
+    reply('Welcome to Sherlock Homes API');
+  }
+});
 
-  console.error(error);
-  process.exit(1);
+server.route({
+
+  method: 'POST',
+  path: '/',
+  handler: (request, reply) => {
+
+    try
+    {
+      const criteria = request.payload;
+
+      if (criteria.offerType)
+      {
+        criteria.offerType = criteria.offerType === 'purchase' ? Offer.types.PURCHASE : Offer.types.RENT;
+      }
+
+      const sc = new SearchCriteria(criteria);
+      const se1 = new FonciaSearchEngine();
+      const se2 = new OrpiSearchEngine();
+      const se3 = new Century21SearchEngine();
+
+      const search = Promise.all([
+        se1.findOffers(sc),
+        se2.findOffers(sc),
+        se3.findOffers(sc)
+      ]);
+
+      search.then((offers) => {
+
+        offers = [].concat.apply([], offers);
+
+        reply(offers);
+      })
+      .catch((error) => {
+
+        const response = reply({
+          message: error.getMessage(),
+          name: error.getName()
+        });
+
+        response.statusCode = 500;
+      });
+    }
+    catch (error)
+    {
+      const response = reply({
+        message: error.getMessage(),
+        name: error.getName()
+      });
+
+      response.statusCode = 400;
+    }
+  }
 });
