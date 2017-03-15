@@ -96,7 +96,7 @@ casper.then(function() {
           var REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
           var REGEXP_IS_FURNISHED = /\bmeubl(é|e)\b/i;
           var REGEXP_PRICE = /([0-9]+\.[0-9]*)/;
-          var REGEXP_SURFACE_AREA = /([0-9]+) m2/;
+          var REGEXP_SURFACE_AREA = /([0-9.]+) m2/;
           var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
 
           var agencyFees = Number(document.querySelector('.OfferTop-mentions')
