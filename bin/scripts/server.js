@@ -10,7 +10,10 @@ const server = new Hapi.Server();
 
 server.connection({
   host: argv.host,
-  port: argv.port
+  port: argv.port,
+  routes: {
+    cors: true
+  }
 });
 
 server.start((err) => {
