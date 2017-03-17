@@ -108,12 +108,12 @@ casper.then(function() {
         var offer = casper.evaluate(function(searchCriteria){
 
           var REGEXP_AGENCY_FEES = /Honoraires TTC locataire : ([0-9]+) €/;
-          var REGEXP_IS_FURNISHED = /\bmeubl(é|e)\b/i;
+          var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
           var REGEXP_PRICE = /([0-9]+) €/;
           var REGEXP_SURFACE_AREA = /([0-9]+) m2/;
           var REGEXP_ZIPCODE = new RegExp('((' + searchCriteria.zipCodes.join('|') + '))');
 
-          var description = document.querySelector('.synopsis-textcell').textContent;
+          var description = document.querySelector('.synopsis-textcell').textContent.replace(/[éÉ]/g, 'e');
           var locationDetails = document.querySelector('.estateOffer-location').textContent;
           var offerDetails = document.querySelector('.estate-characteristic-right').textContent;
           var priceDetails = document.querySelector('.estateOffer-price').textContent;

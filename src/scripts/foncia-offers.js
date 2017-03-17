@@ -94,7 +94,7 @@ casper.then(function() {
         var offer = casper.evaluate(function(types) {
 
           var REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
-          var REGEXP_IS_FURNISHED = /\bmeubl(é|e)\b/i;
+          var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
           var REGEXP_PRICE = /([0-9]+\.[0-9]*)/;
           var REGEXP_SURFACE_AREA = /([0-9.]+) m2/;
           var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
@@ -103,7 +103,7 @@ casper.then(function() {
             .textContent
             .match(REGEXP_AGENCY_FEES)[1]);
 
-          var isFurnished = REGEXP_IS_FURNISHED.test(document.querySelector('.OfferDetails-content').textContent);
+          var isFurnished = REGEXP_IS_FURNISHED.test(document.querySelector('.OfferDetails-content').textContent.replace(/[éÉ]/g, 'e'));
 
           var price = Number(document.querySelector('.OfferTop-price')
             .textContent
