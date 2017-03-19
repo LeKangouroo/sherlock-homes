@@ -9,12 +9,12 @@ const casper = require('casper').create({
   }
 });
 
+casper.on('remote.message', function(msg) { console.log(msg); });
+
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 
-var offers;
-var offersUrls;
 var url = searchEngine.websiteUrl;
 
 // Goes to the section of the website corresponding to the offer type
@@ -84,67 +84,17 @@ casper.then(function() {
 
   if (this.visible(offerSelector))
   {
-    offers = [];
-    offersUrls = this.evaluate(function(selector) {
+    this.evaluate(function(selector) {
 
-      var urls = [];
       var elements = document.querySelectorAll(selector);
       var count = elements.length;
 
       for (var i = 0; i < count; i++)
       {
-        var el = elements[i];
-
-        urls.push(el.querySelector('.estateItem').href);
+        console.log(JSON.stringify({ type: 'url', data: elements[i].querySelector('.estateItem').href }));
       }
-      return urls;
-
     }, offerSelector);
-
-    this.each(offersUrls, function(casper, link) {
-
-      casper.thenOpen(link, function() {
-
-        var offer = casper.evaluate(function(searchCriteria){
-
-          var REGEXP_AGENCY_FEES = /Honoraires TTC locataire : ([0-9]+) €/;
-          var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
-          var REGEXP_PRICE = /([0-9]+) €/;
-          var REGEXP_SURFACE_AREA = /([0-9]+) m2/;
-          var REGEXP_ZIPCODE = new RegExp('((' + searchCriteria.zipCodes.join('|') + '))');
-
-          var description = document.querySelector('.synopsis-textcell').textContent.replace(/[éÉ]/g, 'e');
-          var locationDetails = document.querySelector('.estateOffer-location').textContent;
-          var offerDetails = document.querySelector('.estate-characteristic-right').textContent;
-          var priceDetails = document.querySelector('.estateOffer-price').textContent;
-
-          return {
-            agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1]),
-            isFurnished: REGEXP_IS_FURNISHED.test(description),
-            price: Number(priceDetails.match(REGEXP_PRICE)[1]),
-            surfaceArea: Number(locationDetails.match(REGEXP_SURFACE_AREA)[1]),
-            type: searchCriteria.offerType,
-            url: window.location.href,
-            zipCode: window.location.href.match(REGEXP_ZIPCODE)[1]
-          };
-        }, searchCriteria);
-
-        if (offer)
-        {
-          offers.push(offer);
-        }
-      });
-    });
   }
-  else
-  {
-    offers = [];
-  }
-});
-
-casper.then(function() {
-
-  this.echo(JSON.stringify(offers));
 });
 
 casper.run();

@@ -1,5 +1,7 @@
+const Casper = require('./casper');
 const isString = require('lodash/isString');
 const isUrl = require('validator/lib/isURL');
+const Offer = require('./offer');
 const SearchCriteria = require('./search-criteria');
 const SearchEngineException = require('./search-engine-exception');
 
@@ -34,6 +36,75 @@ class SearchEngine
     {
       throw new SearchEngineException('invalid argument. expected an instance of the SearchCriteria');
     }
+
+    const args = [
+      `--offer-types=${JSON.stringify(Offer.types)}`,
+      `--search-criteria=${JSON.stringify(searchCriteria)}`,
+      `--search-engine=${JSON.stringify(this)}`
+    ];
+    const searchEngineName = this.getName();
+    const newOffersUrls = [];
+    const offers = [];
+
+    let scriptName;
+    let childProcess;
+
+    scriptName = `${searchEngineName}/get-urls`;
+    childProcess = Casper.runScript(scriptName, args);
+    childProcess.stdout.on('data', (buffer) => {
+
+      const message = Casper.parseStreamBuffer(buffer);
+
+      if (message === null)
+      {
+        return;
+      }
+      if (message.type === 'url')
+      {
+        if (SearchEngine.isOfferCached(message.data))
+        {
+          console.log('url is cached');
+        }
+        else
+        {
+          newOffersUrls.push(message.data);
+        }
+      }
+    });
+    childProcess.on('close', (code, signal) => {
+
+      console.log(`script closed with exit code (${code}) with signal "${signal}"`);
+
+      if (code !== 0)
+      {
+        throw new SearchEngineException(`error during execution of ${scriptName} script`);
+      }
+      args.push(`--urls=${JSON.stringify(newOffersUrls)}`);
+      scriptName = `${searchEngineName}/get-offers`;
+      childProcess = Casper.runScript(scriptName, args);
+      childProcess.stdout.on('data', (buffer) => {
+
+        const message = Casper.parseStreamBuffer(buffer);
+
+        if (message === null)
+        {
+          return;
+        }
+        if (message.type === 'offer')
+        {
+          console.log('offer', message.data);
+        }
+      });
+      childProcess.on('close', (code, signal) => {
+
+        console.log(`script closed with exit code (${code}) with signal "${signal}"`);
+
+        if (code !== 0)
+        {
+          throw new SearchEngineException(`error during execution of ${scriptName} script`);
+        }
+      });
+    });
   }
   getName()
   {
@@ -46,6 +117,10 @@ class SearchEngine
   static isNameValid(name)
   {
     return (isString(name) && name.length > 0);
+  }
+  static isOfferCached(url)
+  {
+    return false;
   }
   static isWebsiteUrlValid(url)
   {
