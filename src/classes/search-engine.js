@@ -1,3 +1,4 @@
+const Cache = require('./cache');
 const Casper = require('./casper');
 const isString = require('lodash/isString');
 const isUrl = require('validator/lib/isURL');
@@ -42,6 +43,7 @@ class SearchEngine
       `--search-criteria=${JSON.stringify(searchCriteria)}`,
       `--search-engine=${JSON.stringify(this)}`
     ];
+    const cache = Cache.getInstance();
     const searchEngineName = this.getName();
     const newOffersUrls = [];
     const offers = [];
@@ -61,14 +63,18 @@ class SearchEngine
       }
       if (message.type === 'url')
       {
-        if (SearchEngine.isOfferCached(message.data))
-        {
-          console.log('url is cached');
-        }
-        else
-        {
-          newOffersUrls.push(message.data);
-        }
+        const offer = cache.getOfferByURL(message.data);
+
+        console.log('offer', offer);
+
+        // if (SearchEngine.isOfferCached(message.data))
+        // {
+        //   console.log('url is cached');
+        // }
+        // else
+        // {
+        //   newOffersUrls.push(message.data);
+        // }
       }
     });
     childProcess.on('close', (code, signal) => {
@@ -92,7 +98,7 @@ class SearchEngine
         }
         if (message.type === 'offer')
         {
-          console.log('offer', message.data);
+          offers.push(new Offer(message.data));
         }
       });
       childProcess.on('close', (code, signal) => {
@@ -103,6 +109,7 @@ class SearchEngine
         {
           throw new SearchEngineException(`error during execution of ${scriptName} script`);
         }
+        console.log('offers', offers);
       });
     });
   }
@@ -117,10 +124,6 @@ class SearchEngine
   static isNameValid(name)
   {
     return (isString(name) && name.length > 0);
-  }
-  static isOfferCached(url)
-  {
-    return false;
   }
   static isWebsiteUrlValid(url)
   {

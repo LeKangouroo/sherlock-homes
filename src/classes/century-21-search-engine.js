@@ -9,10 +9,11 @@ class Century21SearchEngine extends SearchEngine
   constructor()
   {
     super({
-      name: 'Century 21',
+      name: 'century-21',
       websiteUrl: 'https://www.century21.fr'
     });
   }
+  // TODO: override this method to pass zipcodes used in the search form autocompletion
   findOffers(searchCriteria)
   {
     super.findOffers(searchCriteria);

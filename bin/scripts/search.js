@@ -14,43 +14,46 @@ try
     offerType: argv.offerType === 'purchase' ? Offer.types.PURCHASE : Offer.types.RENT,
     zipCodes: argv.zipCodes.map(String)
   });
-  const se1 = new FonciaSearchEngine();
+  // const se1 = new FonciaSearchEngine();
   const se2 = new OrpiSearchEngine();
-  const se3 = new Century21SearchEngine();
-  const search = Promise.all([
-    se1.findOffers(sc),
-    se2.findOffers(sc),
-    se3.findOffers(sc)
-  ]);
+  // const se3 = new Century21SearchEngine();
+  // const search = Promise.all([
+  //   se1.findOffers(sc),
+  //   se2.findOffers(sc),
+  //   se3.findOffers(sc)
+  // ]);
 
-  search
-    .then((offers) => {
+  se2.findOffers(sc);
 
-      offers = [].concat.apply([], offers);
 
-      if (offers.length === 0)
-      {
-        console.log('Aucune offre trouvée');
-        process.exit(0);
-      }
-
-      let data;
-
-      switch (argv.format)
-      {
-        case 'csv':
-          data = json2csv({ data: offers, fields: Object.keys(offers[0]), del: argv.delimiter });
-          break;
-        default:
-          data = JSON.stringify(offers, null, 2);
-          break;
-      }
-      console.log(data);
-    })
-    .catch((error) => {
-
-      throw error;
-    });
+  // search
+  //   .then((offers) => {
+  //
+  //     offers = [].concat.apply([], offers);
+  //
+  //     if (offers.length === 0)
+  //     {
+  //       console.log('Aucune offre trouvée');
+  //       process.exit(0);
+  //     }
+  //
+  //     let data;
+  //
+  //     switch (argv.format)
+  //     {
+  //       case 'csv':
+  //         data = json2csv({ data: offers, fields: Object.keys(offers[0]), del: argv.delimiter });
+  //         break;
+  //       default:
+  //         data = JSON.stringify(offers, null, 2);
+  //         break;
+  //     }
+  //     console.log(data);
+  //   })
+  //   .catch((error) => {
+  //
+  //     throw error;
+  //   });
 }
 catch (error)
 {

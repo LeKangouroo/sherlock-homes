@@ -24,6 +24,7 @@
     "hapi": "16.1.0",
     "json2csv": "3.7.3",
     "lodash": "4.17.4",
+    "redis": "2.7.1",
     "validator": "6.2.1",
     "xmlhttprequest": "1.8.0",
     "yargs": "7.0.2"
