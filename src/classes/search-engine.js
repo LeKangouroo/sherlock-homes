@@ -66,7 +66,7 @@ class SearchEngine
               const url = message.data;
 
               cache
-                .getOfferByURL(url)
+                .findOfferByURL(url)
                 .then((offer) => {
 
                   if (offer.data === null)
@@ -106,7 +106,7 @@ class SearchEngine
               }
               if (message.type === 'offer')
               {
-                cache.setOffer(message.data);
+                cache.saveOffer(message.data);
                 offers.push(new Offer(message.data));
               }
             });

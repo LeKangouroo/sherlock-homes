@@ -12,17 +12,15 @@ class Cache
   {
     this.client.quit();
   }
-  getOfferByURL(url)
+  getData(key)
   {
     return new Promise((resolve, reject) => {
-
-      const key = `offer:${Cache.hashKeyId(url)}`;
 
       this.client.get(key, (err, data) => {
 
         if (err)
         {
-          return reject(new CacheException('Error while retrieving offer by URL', err));
+          return reject(new CacheException(`Error while retrieving value of key "${key}" in the cache server`, err));
         }
         if (data !== null)
         {
@@ -32,19 +30,28 @@ class Cache
       });
     });
   }
-  setOffer(offer)
+  findOfferByURL(url)
+  {
+    return this.getData(`offer:${Cache.hashKeyId(url)}`);
+  }
+  saveOffer(offer)
+  {
+    const key = `offer:${Cache.hashKeyId(offer.url)}`;
+    const data = JSON.stringify(offer);
+
+    return this.setData(key, data);
+  }
+  setData(key, data)
   {
     return new Promise((resolve, reject) => {
 
-      const key = `offer:${Cache.hashKeyId(offer.url)}`;
-
-      this.client.set(key, JSON.stringify(offer), (err, res) => {
+      this.client.set(key, data, (err) => {
 
         if (err)
         {
-          return reject(new CacheException('Error while set offer', err));
+          return reject(new CacheException(`Error while setting value of key "${key}"`, err));
         }
-        resolve(res);
+        resolve();
       });
     });
   }
