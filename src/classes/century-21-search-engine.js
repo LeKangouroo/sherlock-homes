@@ -1,3 +1,4 @@
+const Cache = require('./cache');
 const Casper = require('./casper');
 const Offer = require('./offer');
 const Request = require('./request');
@@ -13,51 +14,72 @@ class Century21SearchEngine extends SearchEngine
       websiteUrl: 'https://www.century21.fr'
     });
   }
-  // TODO: override this method to pass zipcodes used in the search form autocompletion
   findOffers(searchCriteria)
   {
-    super.findOffers(searchCriteria);
-
     return new Promise((resolve, reject) => {
 
-      const reqs = searchCriteria.zipCodes
-        .map((zipCode) => (new Request(`https://www.century21.fr/autocomplete/localite/?q=${zipCode}`)).send());
+      Cache
+        .getInstance()
+        .then((cache) => {
 
-      Promise
-        .all(reqs)
-        .then((responses) => {
+          const zipCodeFetchSteps = searchCriteria.zipCodes.map((zipCode) => new Promise((resolve, reject) => {
 
-          const zipCodes = responses
-            .filter((response) => response.isOK())
-            .map((response) => response.json())
-            .filter((data) => data.length > 0)
-            .map((data) => data[0]);
+            const cacheKey = `century21:zipCode:${zipCode}`;
 
-          if (zipCodes.length === 0)
-          {
-            throw new SearchEngineException('no matching zip code');
-          }
+            cache
+              .getData(cacheKey)
+              .then((record) => {
 
-          const args = [
-            `--offer-types=${JSON.stringify(Offer.types)}`,
-            `--search-criteria=${JSON.stringify(searchCriteria)}`,
-            `--search-engine=${JSON.stringify(this)}`,
-            `--zip-codes=${JSON.stringify(zipCodes)}`
-          ];
+                if (record.data !== null)
+                {
+                  console.log('old record', record);
 
-          Casper.runScript('century-21-offers', args)
-            .then((stdout) => {
+                  return resolve(record.data);
+                }
 
-              resolve(JSON.parse(stdout).map((o, i) => new Offer(o)));
+                const req = new Request(`https://www.century21.fr/autocomplete/localite/?q=${zipCode}`);
+
+                req
+                  .send()
+                  .then((response) => {
+
+                    if (!response.isOK())
+                    {
+                      return reject(new SearchEngineException('Unexpected response from Century 21 autocomplete webservice'));
+                    }
+
+                    const results = response.json();
+
+                    if (results.length > 0)
+                    {
+                      const data = results[results.length - 1];
+
+                      cache.setData(cacheKey, JSON.stringify(data));
+                      resolve(data);
+                    }
+                  })
+                  .catch((error) => reject(error));
+              })
+              .catch((error) => reject(error));
+          }));
+
+          Promise
+            .all(zipCodeFetchSteps)
+            .then((zipCodes) => {
+
+              if (zipCodes.length === 0)
+              {
+                throw new SearchEngineException('no matching zip code');
+              }
+              super
+                .findOffers(searchCriteria, { args: [`--zip-codes=${JSON.stringify(zipCodes)}`] })
+                .then((offers) => resolve(offers))
+                .catch((error) => reject(error));
             })
-            .catch((stderr) => {
+            .catch((error) => {
 
-              reject(new SearchEngineException(`Error during Century 21 offers searching: ${stderr}`));
+              reject(new SearchEngineException(`error while retrieving zip codes autocomplete data: ${error.toString()}`))
             });
-        })
-        .catch((error) => {
-
-          reject(new SearchEngineException(`error while retrieving zip codes autocomplete data: ${error.toString()}`))
         });
     });
   }

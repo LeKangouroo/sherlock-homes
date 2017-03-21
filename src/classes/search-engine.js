@@ -31,7 +31,7 @@ class SearchEngine
     this.name = opts.name;
     this.websiteUrl = opts.websiteUrl;
   }
-  findOffers(searchCriteria)
+  findOffers(searchCriteria, options = {})
   {
     return new Promise((resolve, reject) => {
 
@@ -43,11 +43,12 @@ class SearchEngine
         .getInstance()
         .then((cache) => {
 
-          const args = [
+          const defaultArgs = [
             `--offer-types=${JSON.stringify(Offer.types)}`,
             `--search-criteria=${JSON.stringify(searchCriteria)}`,
             `--search-engine=${JSON.stringify(this)}`
           ];
+          const args = (Array.isArray(options.args)) ? defaultArgs.concat(options.args) : defaultArgs;
           const searchEngineName = this.getName();
           const newOffersUrls = [];
           const offers = [];
@@ -77,7 +78,8 @@ class SearchEngine
                   {
                     offers.push(new Offer(offer.data));
                   }
-                });
+                })
+                .catch((error) => reject(error));
             }
           });
           childProcess1.on('exit', (code) => {
@@ -87,12 +89,13 @@ class SearchEngine
               return reject(new SearchEngineException(`error during execution of get-urls CasperJS script in ${this.getName()} class`));
             }
 
-            args.push(`--urls=${JSON.stringify(newOffersUrls)}`);
 
             if (newOffersUrls.length === 0)
             {
               return resolve(offers);
             }
+
+            args.push(`--urls=${JSON.stringify(newOffersUrls)}`);
 
             const childProcess2 = Casper.runScript(`${searchEngineName}/get-offers`, args);
 
