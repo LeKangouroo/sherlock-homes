@@ -33,84 +33,94 @@ class SearchEngine
   }
   findOffers(searchCriteria)
   {
-    if (!(searchCriteria instanceof SearchCriteria))
-    {
-      throw new SearchEngineException('invalid argument. expected an instance of the SearchCriteria');
-    }
+    return new Promise((resolve, reject) => {
 
-    const args = [
-      `--offer-types=${JSON.stringify(Offer.types)}`,
-      `--search-criteria=${JSON.stringify(searchCriteria)}`,
-      `--search-engine=${JSON.stringify(this)}`
-    ];
-    const cache = Cache.getInstance();
-    const searchEngineName = this.getName();
-    const newOffersUrls = [];
-    const offers = [];
-
-    let scriptName;
-    let childProcess;
-
-    scriptName = `${searchEngineName}/get-urls`;
-    childProcess = Casper.runScript(scriptName, args);
-    childProcess.stdout.on('data', (buffer) => {
-
-      const message = Casper.parseStreamBuffer(buffer);
-
-      if (message === null)
+      if (!(searchCriteria instanceof SearchCriteria))
       {
-        return;
+        return reject(new SearchEngineException('invalid argument. expected an instance of the SearchCriteria'));
       }
-      if (message.type === 'url')
-      {
-        const offer = cache.getOfferByURL(message.data);
+      Cache
+        .getInstance()
+        .then((cache) => {
 
-        console.log('offer', offer);
+          const args = [
+            `--offer-types=${JSON.stringify(Offer.types)}`,
+            `--search-criteria=${JSON.stringify(searchCriteria)}`,
+            `--search-engine=${JSON.stringify(this)}`
+          ];
+          const searchEngineName = this.getName();
+          const newOffersUrls = [];
+          const offers = [];
+          const childProcess1 = Casper.runScript(`${searchEngineName}/get-urls`, args);
 
-        // if (SearchEngine.isOfferCached(message.data))
-        // {
-        //   console.log('url is cached');
-        // }
-        // else
-        // {
-        //   newOffersUrls.push(message.data);
-        // }
-      }
-    });
-    childProcess.on('close', (code, signal) => {
+          childProcess1.stdout.on('data', (buffer) => {
 
-      console.log(`script closed with exit code (${code}) with signal "${signal}"`);
+            const message = Casper.parseStreamBuffer(buffer);
 
-      if (code !== 0)
-      {
-        throw new SearchEngineException(`error during execution of ${scriptName} script`);
-      }
-      args.push(`--urls=${JSON.stringify(newOffersUrls)}`);
-      scriptName = `${searchEngineName}/get-offers`;
-      childProcess = Casper.runScript(scriptName, args);
-      childProcess.stdout.on('data', (buffer) => {
+            if (message === null)
+            {
+              return;
+            }
+            if (message.type === 'url')
+            {
+              const url = message.data;
 
-        const message = Casper.parseStreamBuffer(buffer);
+              cache
+                .getOfferByURL(url)
+                .then((offer) => {
 
-        if (message === null)
-        {
-          return;
-        }
-        if (message.type === 'offer')
-        {
-          offers.push(new Offer(message.data));
-        }
-      });
-      childProcess.on('close', (code, signal) => {
+                  if (offer.data === null)
+                  {
+                    newOffersUrls.push(url);
+                  }
+                  else
+                  {
+                    offers.push(new Offer(offer.data));
+                  }
+                });
+            }
+          });
+          childProcess1.on('exit', (code) => {
 
-        console.log(`script closed with exit code (${code}) with signal "${signal}"`);
+            if (code !== 0)
+            {
+              return reject(new SearchEngineException(`error during execution of get-urls CasperJS script in ${this.getName()} class`));
+            }
 
-        if (code !== 0)
-        {
-          throw new SearchEngineException(`error during execution of ${scriptName} script`);
-        }
-        console.log('offers', offers);
-      });
+            args.push(`--urls=${JSON.stringify(newOffersUrls)}`);
+
+            if (newOffersUrls.length === 0)
+            {
+              return resolve(offers);
+            }
+
+            const childProcess2 = Casper.runScript(`${searchEngineName}/get-offers`, args);
+
+            childProcess2.stdout.on('data', (buffer) => {
+
+              const message = Casper.parseStreamBuffer(buffer);
+
+              if (message === null)
+              {
+                return;
+              }
+              if (message.type === 'offer')
+              {
+                cache.setOffer(message.data);
+                offers.push(new Offer(message.data));
+              }
+            });
+            childProcess2.on('exit', (code) => {
+
+              if (code !== 0)
+              {
+                return reject(new SearchEngineException(`error during execution of get-offers CasperJS script in ${this.getName()} class`));
+              }
+              return resolve(offers);
+            });
+          });
+        })
+        .catch((error) => reject(error));
     });
   }
   getName()

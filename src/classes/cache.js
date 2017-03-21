@@ -4,13 +4,17 @@ const redis = require('redis');
 
 class Cache
 {
-  constructor()
+  constructor(client)
   {
-    this.client = redis.createClient();
+    this.client = client;
+  }
+  disconnect()
+  {
+    this.client.quit();
   }
   getOfferByURL(url)
   {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
 
       const key = `offer:${Cache.hashKeyId(url)}`;
 
@@ -18,7 +22,7 @@ class Cache
 
         if (err)
         {
-          throw new CacheException('Error while retrieving offer by URL', err);
+          return reject(new CacheException('Error while retrieving offer by URL', err));
         }
         if (data !== null)
         {
@@ -30,7 +34,7 @@ class Cache
   }
   setOffer(offer)
   {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
 
       const key = `offer:${Cache.hashKeyId(offer.url)}`;
 
@@ -38,19 +42,39 @@ class Cache
 
         if (err)
         {
-          throw new CacheException('Error while set offer', err);
+          return reject(new CacheException('Error while set offer', err));
         }
         resolve(res);
       });
     });
   }
+  static connect()
+  {
+    return new Promise((resolve, reject) => {
+
+      const client = redis.createClient();
+
+      client.on('ready', () => resolve(client));
+      client.on('error', (err) => reject(new CacheException('Failed to connect to the cache server', err)));
+    });
+  }
   static getInstance()
   {
-    if (!this.instance)
-    {
-      this.instance = new Cache();
-    }
-    return this.instance;
+    return new Promise((resolve, reject) => {
+
+      if (this.instance)
+      {
+        return resolve(this.instance);
+      }
+      Cache
+        .connect()
+        .then((client) => {
+
+          this.instance = new Cache(client);
+          resolve(this.instance);
+        })
+        .catch((err) => reject(err));
+    });
   }
   static hashKeyId(id)
   {

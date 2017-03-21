@@ -1,4 +1,5 @@
 const argv = require('../usage/usage').argv;
+const Cache = require('../../src/classes/cache');
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
 const json2csv = require('json2csv');
@@ -17,43 +18,41 @@ try
   // const se1 = new FonciaSearchEngine();
   const se2 = new OrpiSearchEngine();
   // const se3 = new Century21SearchEngine();
-  // const search = Promise.all([
+  const search = Promise.all([
   //   se1.findOffers(sc),
-  //   se2.findOffers(sc),
+    se2.findOffers(sc),
   //   se3.findOffers(sc)
-  // ]);
+  ]);
 
-  se2.findOffers(sc);
+  search
+    .then((offers) => {
 
+      offers = [].concat.apply([], offers);
 
-  // search
-  //   .then((offers) => {
-  //
-  //     offers = [].concat.apply([], offers);
-  //
-  //     if (offers.length === 0)
-  //     {
-  //       console.log('Aucune offre trouvée');
-  //       process.exit(0);
-  //     }
-  //
-  //     let data;
-  //
-  //     switch (argv.format)
-  //     {
-  //       case 'csv':
-  //         data = json2csv({ data: offers, fields: Object.keys(offers[0]), del: argv.delimiter });
-  //         break;
-  //       default:
-  //         data = JSON.stringify(offers, null, 2);
-  //         break;
-  //     }
-  //     console.log(data);
-  //   })
-  //   .catch((error) => {
-  //
-  //     throw error;
-  //   });
+      if (offers.length === 0)
+      {
+        process.stdout.write('Aucune offre trouvée');
+        process.exit(0);
+      }
+
+      let data;
+
+      switch (argv.format)
+      {
+        case 'csv':
+          data = json2csv({ data: offers, fields: Object.keys(offers[0]), del: argv.delimiter });
+          break;
+        default:
+          data = JSON.stringify(offers, null, 2);
+          break;
+      }
+      process.stdout.write(data, 'utf8');
+      process.exit(0);
+    })
+    .catch((error) => {
+
+      throw error;
+    });
 }
 catch (error)
 {
