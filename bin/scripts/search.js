@@ -15,11 +15,11 @@ try
     offerType: argv.offerType === 'purchase' ? Offer.types.PURCHASE : Offer.types.RENT,
     zipCodes: argv.zipCodes.map(String)
   });
-  // const se1 = new FonciaSearchEngine();
+  const se1 = new FonciaSearchEngine();
   const se2 = new OrpiSearchEngine();
   // const se3 = new Century21SearchEngine();
   const search = Promise.all([
-  //   se1.findOffers(sc),
+    se1.findOffers(sc),
     se2.findOffers(sc),
   //   se3.findOffers(sc)
   ]);

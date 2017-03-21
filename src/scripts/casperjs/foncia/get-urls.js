@@ -8,11 +8,12 @@ const casper = require('casper').create({
     height: 1080
   }
 });
+
+casper.on('remote.message', function(msg) { console.log(msg); });
+
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
-
-var offers = [];
 
 // Loads search engine's website url
 casper.start(searchEngine.websiteUrl);
@@ -66,11 +67,10 @@ casper.then(function() {
 
   if (this.visible(offerSelector))
   {
-    var urls = this.evaluate(function(offerSelector) {
+    this.evaluate(function(offerSelector) {
 
       var offers = document.querySelectorAll(offerSelector);
       var length = offers.length;
-      var urls = [];
 
       for (var i = 0; i < length; i++)
       {
@@ -80,73 +80,11 @@ casper.then(function() {
 
         if (el && el.href)
         {
-          urls.push(el.href);
+          console.log(JSON.stringify({ type: 'url', data: el.href }));
         }
       }
-      return urls;
-
     }, offerSelector);
-
-    this.each(urls, function(casper, url) {
-
-      casper.thenOpen(url, function() {
-
-        var offer = casper.evaluate(function(types) {
-
-          var REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
-          var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
-          var REGEXP_PRICE = /([0-9]+\.[0-9]*)/;
-          var REGEXP_SURFACE_AREA = /([0-9.]+) m2/;
-          var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
-
-          var agencyFees = Number(document.querySelector('.OfferTop-mentions')
-            .textContent
-            .match(REGEXP_AGENCY_FEES)[1]);
-
-          var isFurnished = REGEXP_IS_FURNISHED.test(document.querySelector('.OfferDetails-content').textContent.replace(/[éÉ]/g, 'e'));
-
-          var price = Number(document.querySelector('.OfferTop-price')
-            .textContent
-            .trim()
-            .match(REGEXP_PRICE)[1]);
-
-          var surfaceArea = Number(document.querySelector('.OfferTop-col--right')
-            .textContent
-            .trim()
-            .match(REGEXP_SURFACE_AREA)[1]);
-
-          // TODO: add support of multiple offer types
-          var type = types.RENT;
-
-          var zipCode = document.querySelector('.OfferTop-loc')
-            .textContent
-            .match(REGEXP_ZIP_CODE)[1];
-
-          return {
-            agencyFees: agencyFees,
-            isFurnished: isFurnished,
-            price: price,
-            surfaceArea: surfaceArea,
-            type: type,
-            url: window.location.href,
-            zipCode: zipCode
-          };
-
-        }, offerTypes);
-
-        if (offer)
-        {
-          offers.push(offer);
-        }
-      });
-    });
   }
-});
-
-// Outputs offers to stdout
-casper.then(function() {
-
-  this.echo(JSON.stringify(offers));
 });
 
 casper.run();
