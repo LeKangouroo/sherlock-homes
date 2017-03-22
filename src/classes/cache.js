@@ -93,6 +93,10 @@ class Cache
       .update(id)
       .digest('hex');
   }
+  static isConnected()
+  {
+    return (typeof this.instance !== 'undefined');
+  }
 }
 
 module.exports = Cache;
