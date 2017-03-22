@@ -14,6 +14,9 @@ class Offer
 {
   constructor(options)
   {
+    // TODO: fix invalid price error with following params: {"maxPrice":1000,"minSurfaceArea":10,"offerType":"rent","zipCodes":["75019","75020","75018","75017"]}
+    console.log('offer', options);
+
     const DEFAULT_OPTIONS = {
       agencyFees: null,
       isFurnished: null,
