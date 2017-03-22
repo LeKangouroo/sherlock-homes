@@ -32,8 +32,6 @@ class Century21SearchEngine extends SearchEngine
 
                 if (record.data !== null)
                 {
-                  console.log('old record', record);
-
                   return resolve(record.data);
                 }
 
