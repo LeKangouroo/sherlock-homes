@@ -9,13 +9,12 @@ const casper = require('casper').create({
   }
 });
 
-casper.on('remote.message', function(msg) { console.log(msg); });
-
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 
 var url = searchEngine.websiteUrl;
+var urls = [];
 
 // Goes to the section of the website corresponding to the offer type
 url += (searchCriteria.offerType === offerTypes.PURCHASE) ? '/acheter' : '/louer';
@@ -84,17 +83,25 @@ casper.then(function() {
 
   if (this.visible(offerSelector))
   {
-    this.evaluate(function(selector) {
+    urls = this.evaluate(function(selector) {
 
       var elements = document.querySelectorAll(selector);
       var count = elements.length;
+      var urls = [];
 
       for (var i = 0; i < count; i++)
       {
-        console.log(JSON.stringify({ type: 'url', data: elements[i].querySelector('.estateItem').href }));
+        urls.push(elements[i].querySelector('.estateItem').href);
       }
+      return urls;
+
     }, offerSelector);
   }
+});
+
+casper.then(function() {
+
+  this.echo(JSON.stringify({ type: 'urls', data: urls }));
 });
 
 casper.run();
