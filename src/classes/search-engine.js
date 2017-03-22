@@ -62,24 +62,28 @@ class SearchEngine
             {
               return;
             }
-            if (message.type === 'url')
+
+            if (message.type === 'urls')
             {
-              const url = message.data;
+              const urls = message.data;
 
-              cache
-                .findOfferByURL(url)
-                .then((offer) => {
+              urls.forEach(url => {
 
-                  if (offer.data === null)
-                  {
-                    newOffersUrls.push(url);
-                  }
-                  else
-                  {
-                    offers.push(new Offer(offer.data));
-                  }
-                })
-                .catch((error) => reject(error));
+                cache
+                  .findOfferByURL(url)
+                  .then((offer) => {
+
+                    if (offer.data === null)
+                    {
+                      newOffersUrls.push(url);
+                    }
+                    else
+                    {
+                      offers.push(new Offer(offer.data));
+                    }
+                  })
+                  .catch((error) => reject(error));
+              });
             }
           });
           childProcess1.on('exit', (code) => {

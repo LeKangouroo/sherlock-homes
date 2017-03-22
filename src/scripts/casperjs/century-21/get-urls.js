@@ -9,14 +9,13 @@ const casper = require('casper').create({
   }
 });
 
-casper.on('remote.message', function(msg) { console.log(msg); });
-
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 const zipCodes = JSON.parse(casper.cli.options['zip-codes']);
 
 var url = searchEngine.websiteUrl;
+var urls = [];
 
 // Goes to the section of the website corresponding to the offer type
 url += (searchCriteria.offerType === offerTypes.PURCHASE) ? '/acheter' : '/louer';
@@ -64,23 +63,23 @@ casper.thenClick('#btnRECHERCHE');
 // Scraps offers links
 casper.then(function() {
 
-  casper.evaluate(function() {
+  urls = casper.evaluate(function() {
 
     var anchors = document.querySelectorAll('.annoncesListeBien:first-of-type .annonce .zone-text-loupe a');
     var length = anchors.length;
-
-    console.log(JSON.stringify({ type: 'url', data: 'count =' + length }));
+    var urls = [];
 
     for (var i = 0; i < length; i++)
     {
-      console.log(JSON.stringify({ type: 'url', data: anchors[i].href }));
+      urls.push(anchors[i].href);
     }
+    return urls;
   });
 });
 
 casper.then(function() {
 
-  this.exit();
+  this.echo(JSON.stringify({ type: 'urls', data: urls }));
 });
 
 casper.run();

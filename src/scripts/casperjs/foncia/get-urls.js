@@ -9,11 +9,11 @@ const casper = require('casper').create({
   }
 });
 
-casper.on('remote.message', function(msg) { console.log(msg); });
-
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
+
+var urls = [];
 
 // Loads search engine's website url
 casper.start(searchEngine.websiteUrl);
@@ -67,10 +67,11 @@ casper.then(function() {
 
   if (this.visible(offerSelector))
   {
-    this.evaluate(function(offerSelector) {
+    urls = this.evaluate(function(offerSelector) {
 
       var offers = document.querySelectorAll(offerSelector);
       var length = offers.length;
+      var urls = [];
 
       for (var i = 0; i < length; i++)
       {
@@ -80,11 +81,17 @@ casper.then(function() {
 
         if (el && el.href)
         {
-          console.log(JSON.stringify({ type: 'url', data: el.href }));
+          urls.push(el.href);
         }
       }
+      return urls;
     }, offerSelector);
   }
+});
+
+casper.then(function() {
+
+  this.echo(JSON.stringify({ type: 'urls', data: urls }));
 });
 
 casper.run();
