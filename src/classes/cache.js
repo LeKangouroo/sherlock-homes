@@ -10,7 +10,10 @@ class Cache
   }
   disconnect()
   {
-    this.client.quit();
+    if (this.client)
+    {
+      this.client.quit();
+    }
   }
   getData(key)
   {
