@@ -41,7 +41,10 @@ casper.each(urls, function(casper, link) {
       };
     }, searchCriteria);
 
-    casper.echo(JSON.stringify({ type: 'offer', data: offer }));
+    if (offer)
+    {
+      casper.echo(JSON.stringify({ type: 'offer', data: offer }));
+    }
   });
 });
 

@@ -44,7 +44,11 @@ casper.eachThen(urls, function(response) {
           zipCode: zipCode
         };
       }, offerTypes);
-      casper.echo(JSON.stringify({ type: 'offer', data: offer }));
+
+      if (offer)
+      {
+        casper.echo(JSON.stringify({ type: 'offer', data: offer }));
+      }
     });
   });
 });

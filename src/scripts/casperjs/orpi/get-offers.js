@@ -38,7 +38,11 @@ casper.each(urls, function(casper, link) {
         zipCode: window.location.href.match(REGEXP_ZIPCODE)[1]
       };
     }, searchCriteria);
-    casper.echo(JSON.stringify({ type: 'offer', data: offer }));
+
+    if (offer)
+    {
+      casper.echo(JSON.stringify({ type: 'offer', data: offer }));
+    }
   });
 });
 casper.run();
