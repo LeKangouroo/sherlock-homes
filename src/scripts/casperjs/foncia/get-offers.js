@@ -11,7 +11,7 @@ const casper = require('casper').create({
   waitTimeout: 10000
 });
 
-const offerTypes = JSON.parse(casper.cli.options['offer-types']);
+const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.start();
@@ -19,7 +19,7 @@ casper.eachThen(urls, function(response) {
   casper.open(response.data).then(function() {
     casper.waitForSelector('.Footer', function() {
 
-      var offer = casper.evaluate(function(types) {
+      var offer = casper.evaluate(function(searchCriteria) {
 
         var REGEXP_AGENCY_FEES = /Honoraires ([0-9]+\.?[0-9]*)/;
         var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
@@ -31,7 +31,6 @@ casper.eachThen(urls, function(response) {
         var isFurnished = REGEXP_IS_FURNISHED.test(document.querySelector('.OfferDetails-content').innerText.replace(/[éÉ]/g, 'e'));
         var price = Number(document.querySelector('.OfferTop-price').innerText.match(REGEXP_PRICE)[1]);
         var surfaceArea = Number(document.querySelector('.OfferTop-col--right').innerText.match(REGEXP_SURFACE_AREA)[1]);
-        var type = types.RENT; // TODO: add support of multiple offer types
         var zipCode = document.querySelector('.OfferTop-loc').innerText.match(REGEXP_ZIP_CODE)[1];
 
         return {
@@ -39,11 +38,11 @@ casper.eachThen(urls, function(response) {
           isFurnished: isFurnished,
           price: price,
           surfaceArea: surfaceArea,
-          type: type,
+          type: searchCriteria.offerType,
           url: window.location.href,
           zipCode: zipCode
         };
-      }, offerTypes);
+      }, searchCriteria);
 
       if (offer)
       {
