@@ -54,6 +54,8 @@ class SearchEngine
           const offers = [];
           const childProcess1 = Casper.runScript(`${searchEngineName}/get-urls`, args);
 
+          childProcess1.stdout.pipe(process.stdout);
+          childProcess1.stderr.pipe(process.stdout);
           childProcess1.stdout.on('data', (buffer) => {
 
             const message = Casper.parseStreamBuffer(buffer);
@@ -103,6 +105,8 @@ class SearchEngine
 
             const childProcess2 = Casper.runScript(`${searchEngineName}/get-offers`, args);
 
+            childProcess2.stdout.pipe(process.stdout);
+            childProcess2.stderr.pipe(process.stdout);
             childProcess2.stdout.on('data', (buffer) => {
 
               const message = Casper.parseStreamBuffer(buffer);
