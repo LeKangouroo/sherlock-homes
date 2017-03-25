@@ -13,8 +13,6 @@ const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 
-var urls = [];
-
 function getOfferLinks(linksSelector, nextButtonSelector)
 {
   var urls = casper.evaluate(function(linksSelector) {
@@ -84,12 +82,18 @@ casper.then(function() {
 });
 
 // Scraps informations
-casper.waitForSelector('.TeaserOffer', function() {
+casper.waitForSelector('.TeaserOffer',
+  function() {
 
-  casper.then(function() {
+    casper.then(function() {
 
-    getOfferLinks('.TeaserOffer .TeaserOffer-title a', '.Pagination a:last-child');
-  });
-});
+      getOfferLinks('.TeaserOffer .TeaserOffer-title a', '.Pagination a:last-child');
+    });
+  },
+  function onTimeout() {
+
+    casper.log('No offer found in Foncia website', 'info');
+  }
+);
 
 casper.run();
