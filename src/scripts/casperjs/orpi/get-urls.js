@@ -105,12 +105,18 @@ casper.then(function() {
 });
 
 // Scraps offers informations
-casper.waitForSelector('.resultLayout-estateList', function() {
+casper.waitForSelector('.resultLayout-estateList',
+  function() {
 
-  casper.then(function() {
+    casper.then(function() {
 
-    getOfferLinks('.resultLayout-estateList .column .estateItem', null);
-  });
-});
+      getOfferLinks('.resultLayout-estateList .column .estateItem', null);
+    });
+  },
+  function onTimeout() {
+
+    casper.log('No offer found in Orpi website');
+  }
+);
 
 casper.run();

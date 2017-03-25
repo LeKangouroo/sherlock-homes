@@ -63,9 +63,20 @@ server.route({
 
       search.then((offers) => {
 
+        let response;
+
         offers = [].concat.apply([], offers);
 
-        reply(offers);
+        if (offers.length === 0)
+        {
+          response = reply();
+          response.statusCode = 204;
+        }
+        else
+        {
+          response = reply(JSON.stringify(offers));
+          response.statusCode = 200;
+        }
       })
       .catch((error) => {
 
