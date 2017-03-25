@@ -19,9 +19,9 @@ casper.each(urls, function(casper, link) {
 
     var offer = casper.evaluate(function(searchCriteria){
 
-      var REGEXP_AGENCY_FEES = /Honoraires locataire : ([0-9]+,?[0-9]*) €/;
+      var REGEXP_AGENCY_FEES = /Honoraires locataire : ((((\d{1,3})( \d{3})*)|(\d+))(,\d+)?) €/;
       var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
-      var REGEXP_PRICE = /([0-9]+,?[0-9]*) €/;
+      var REGEXP_PRICE = /((((\d{1,3})( \d{3})*)|(\d+))(,\d+)?) €/;
       var REGEXP_SURFACE_AREA = /Surface habitable : ([0-9]+,?[0-9]*) m2/;
       var REGEXP_ZIPCODE = new RegExp('((' + searchCriteria.zipCodes.join('|') + '))');
 
@@ -31,9 +31,9 @@ casper.each(urls, function(casper, link) {
       var priceDetails = document.querySelector('.tarif').innerText;
 
       return {
-        agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1].replace(',', '.')),
+        agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1].replace(',', '.').replace(' ', '')),
         isFurnished: REGEXP_IS_FURNISHED.test(description),
-        price: Number(priceDetails.match(REGEXP_PRICE)[1].replace(',', '.')),
+        price: Number(priceDetails.match(REGEXP_PRICE)[1].replace(',', '.').replace(' ', '')),
         surfaceArea: Number(offerDetails.match(REGEXP_SURFACE_AREA)[1].replace(',', '.')),
         type: searchCriteria.offerType,
         url: window.location.href,
