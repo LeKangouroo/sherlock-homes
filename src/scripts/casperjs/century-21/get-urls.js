@@ -6,7 +6,9 @@ const casper = require('casper').create({
   viewportSize: {
     width: 1920,
     height: 1080
-  }
+  },
+  retryTimeout: 500,
+  waitTimeout: 10000
 });
 
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
@@ -15,7 +17,35 @@ const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 const zipCodes = JSON.parse(casper.cli.options['zip-codes']);
 
 var url = searchEngine.websiteUrl;
-var urls = [];
+
+function getOfferLinks(linksSelector, nextButtonSelector)
+{
+  var urls = casper.evaluate(function(linksSelector) {
+
+    var anchors = document.querySelectorAll(linksSelector);
+    var length = anchors.length;
+    var urls = [];
+
+    for (var i = 0; i < length; i++)
+    {
+      urls.push(anchors[i].href);
+    }
+    return urls;
+
+  }, linksSelector);
+
+  casper.echo(JSON.stringify({ type: 'urls', data: urls }));
+
+  if (casper.visible(nextButtonSelector))
+  {
+    casper.thenClick(nextButtonSelector);
+    casper.waitUntilVisible(linksSelector);
+    casper.then(function() {
+
+      getOfferLinks(linksSelector, nextButtonSelector);
+    });
+  }
+}
 
 // Goes to the section of the website corresponding to the offer type
 url += (searchCriteria.offerType === offerTypes.PURCHASE) ? '/acheter' : '/louer';
@@ -61,25 +91,12 @@ casper.then(function() {
 casper.thenClick('#btnRECHERCHE');
 
 // Scraps offers links
-casper.then(function() {
+casper.waitForSelector('.annoncesListeBien:first-of-type .annonce', function() {
 
-  urls = casper.evaluate(function() {
+  casper.then(function() {
 
-    var anchors = document.querySelectorAll('.annoncesListeBien:first-of-type .annonce .zone-text-loupe a');
-    var length = anchors.length;
-    var urls = [];
-
-    for (var i = 0; i < length; i++)
-    {
-      urls.push(anchors[i].href);
-    }
-    return urls;
+    getOfferLinks('.annoncesListeBien:first-of-type .annonce .zone-text-loupe a', '.btnSUIV_PREC.suivant a');
   });
-});
-
-casper.then(function() {
-
-  this.echo(JSON.stringify({ type: 'urls', data: urls }));
 });
 
 casper.run();

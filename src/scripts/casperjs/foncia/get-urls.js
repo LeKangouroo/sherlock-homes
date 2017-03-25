@@ -15,6 +15,35 @@ const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 
 var urls = [];
 
+function getOfferLinks(linksSelector, nextButtonSelector)
+{
+  var urls = casper.evaluate(function(linksSelector) {
+
+    var anchors = document.querySelectorAll(linksSelector);
+    var length = anchors.length;
+    var urls = [];
+
+    for (var i = 0; i < length; i++)
+    {
+      urls.push(anchors[i].href);
+    }
+    return urls;
+
+  }, linksSelector);
+
+  casper.echo(JSON.stringify({ type: 'urls', data: urls }));
+
+  if (casper.visible(nextButtonSelector))
+  {
+    casper.thenClick(nextButtonSelector);
+    casper.waitUntilVisible(linksSelector);
+    casper.then(function() {
+
+      getOfferLinks(linksSelector, nextButtonSelector);
+    });
+  }
+}
+
 // Loads search engine's website url
 casper.start(searchEngine.websiteUrl);
 
@@ -54,44 +83,13 @@ casper.then(function() {
   this.fillSelectors('#form_search_offer', values, true);
 });
 
-// Waits for the results page to be loaded
-casper.then(function() {
-
-  this.waitForUrl(/location\/.+$/);
-});
-
 // Scraps informations
-casper.then(function() {
+casper.waitForSelector('.TeaserOffer', function() {
 
-  const offerSelector = '.TeaserOffer';
+  casper.then(function() {
 
-  if (this.visible(offerSelector))
-  {
-    urls = this.evaluate(function(offerSelector) {
-
-      var offers = document.querySelectorAll(offerSelector);
-      var length = offers.length;
-      var urls = [];
-
-      for (var i = 0; i < length; i++)
-      {
-        var o = offers[i];
-        var a = document.createElement('a');
-        var el = o.querySelector('.TeaserOffer-title a');
-
-        if (el && el.href)
-        {
-          urls.push(el.href);
-        }
-      }
-      return urls;
-    }, offerSelector);
-  }
-});
-
-casper.then(function() {
-
-  this.echo(JSON.stringify({ type: 'urls', data: urls }));
+    getOfferLinks('.TeaserOffer .TeaserOffer-title a', '.Pagination a:last-child');
+  });
 });
 
 casper.run();

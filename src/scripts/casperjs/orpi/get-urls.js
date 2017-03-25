@@ -14,7 +14,35 @@ const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 
 var url = searchEngine.websiteUrl;
-var urls = [];
+
+function getOfferLinks(linksSelector, nextButtonSelector)
+{
+  var urls = casper.evaluate(function(linksSelector) {
+
+    var anchors = document.querySelectorAll(linksSelector);
+    var length = anchors.length;
+    var urls = [];
+
+    for (var i = 0; i < length; i++)
+    {
+      urls.push(anchors[i].href);
+    }
+    return urls;
+
+  }, linksSelector);
+
+  casper.echo(JSON.stringify({ type: 'urls', data: urls }));
+
+  if (nextButtonSelector && casper.visible(nextButtonSelector))
+  {
+    casper.thenClick(nextButtonSelector);
+    casper.waitUntilVisible(linksSelector);
+    casper.then(function() {
+
+      getOfferLinks(linksSelector, nextButtonSelector);
+    });
+  }
+}
 
 // Goes to the section of the website corresponding to the offer type
 url += (searchCriteria.offerType === offerTypes.PURCHASE) ? '/acheter' : '/louer';
@@ -77,31 +105,12 @@ casper.then(function() {
 });
 
 // Scraps offers informations
-casper.then(function() {
+casper.waitForSelector('.resultLayout-estateList', function() {
 
-  const offerSelector = '.resultLayout-estateList .column';
+  casper.then(function() {
 
-  if (this.visible(offerSelector))
-  {
-    urls = this.evaluate(function(selector) {
-
-      var elements = document.querySelectorAll(selector);
-      var count = elements.length;
-      var urls = [];
-
-      for (var i = 0; i < count; i++)
-      {
-        urls.push(elements[i].querySelector('.estateItem').href);
-      }
-      return urls;
-
-    }, offerSelector);
-  }
-});
-
-casper.then(function() {
-
-  this.echo(JSON.stringify({ type: 'urls', data: urls }));
+    getOfferLinks('.resultLayout-estateList .column .estateItem', null);
+  });
 });
 
 casper.run();
