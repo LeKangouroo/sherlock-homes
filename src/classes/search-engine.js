@@ -1,5 +1,5 @@
 const Cache = require('./cache');
-const Casper = require('./casper');
+const CasperScript = require('./casper-script');
 const isString = require('lodash/isString');
 const isUrl = require('validator/lib/isURL');
 const Offer = require('./offer');
@@ -52,19 +52,14 @@ class SearchEngine
           const searchEngineName = this.getName();
           const newOffersUrls = [];
           const offers = [];
-          const childProcess1 = Casper.runScript(`${searchEngineName}/get-urls`, args);
+          const urlsCasperScript = new CasperScript(`${searchEngineName}/get-urls`, args);
 
-          childProcess1.stdout.pipe(process.stdout);
-          childProcess1.stderr.pipe(process.stdout);
-          childProcess1.stdout.on('data', (buffer) => {
-
-            const message = Casper.parseStreamBuffer(buffer);
+          urlsCasperScript.addObserver('data', (message) => {
 
             if (message === null)
             {
               return;
             }
-
             if (message.type === 'urls')
             {
               const urls = message.data;
@@ -88,14 +83,12 @@ class SearchEngine
               });
             }
           });
-          childProcess1.on('exit', (code) => {
+          urlsCasperScript.addObserver('exit', (code) => {
 
             if (code !== 0)
             {
               return reject(new SearchEngineException(`error during execution of get-urls CasperJS script in ${this.getName()} class`));
             }
-
-
             if (newOffersUrls.length === 0)
             {
               return resolve(offers);
@@ -103,13 +96,9 @@ class SearchEngine
 
             args.push(`--urls=${JSON.stringify(newOffersUrls)}`);
 
-            const childProcess2 = Casper.runScript(`${searchEngineName}/get-offers`, args);
+            const offersCasperScript = new CasperScript(`${searchEngineName}/get-offers`, args);
 
-            childProcess2.stdout.pipe(process.stdout);
-            childProcess2.stderr.pipe(process.stdout);
-            childProcess2.stdout.on('data', (buffer) => {
-
-              const message = Casper.parseStreamBuffer(buffer);
+            offersCasperScript.addObserver('data', (message) => {
 
               if (message === null)
               {
@@ -121,7 +110,7 @@ class SearchEngine
                 offers.push(new Offer(message.data));
               }
             });
-            childProcess2.on('exit', (code) => {
+            offersCasperScript.addObserver('exit', (code) => {
 
               if (code !== 0)
               {
