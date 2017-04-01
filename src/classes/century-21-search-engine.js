@@ -12,6 +12,7 @@ class Century21SearchEngine extends SearchEngine
       websiteUrl: 'https://www.century21.fr'
     });
   }
+
   findOffers(searchCriteria)
   {
     return new Promise((resolve, reject) => {
@@ -33,28 +34,12 @@ class Century21SearchEngine extends SearchEngine
                   return resolve(record.data);
                 }
 
-                const req = new Request(`https://www.century21.fr/autocomplete/localite/?q=${zipCode}`);
+                Century21SearchEngine.findZipCodeAutocomplete(zipCode).then((data) => {
 
-                req
-                  .send()
-                  .then((response) => {
-
-                    if (!response.isOK())
-                    {
-                      return reject(new SearchEngineException('Unexpected response from Century 21 autocomplete webservice'));
-                    }
-
-                    const results = response.json();
-
-                    if (results.length > 0)
-                    {
-                      const data = results[results.length - 1];
-
-                      cache.setData(cacheKey, JSON.stringify(data));
-                      resolve(data);
-                    }
-                  })
-                  .catch((error) => reject(error));
+                  cache.setData(cacheKey, JSON.stringify(data));
+                  resolve(data);
+                })
+                .catch((error) => reject(error));
               })
               .catch((error) => reject(error));
           }));
@@ -77,6 +62,33 @@ class Century21SearchEngine extends SearchEngine
               reject(new SearchEngineException(`error while retrieving zip codes autocomplete data: ${error.toString()}`))
             });
         });
+    });
+  }
+
+  static findZipCodeAutocomplete(zipCode)
+  {
+    return new Promise((resolve, reject) => {
+
+      const req = new Request(`https://www.century21.fr/autocomplete/localite/?q=${zipCode}`);
+
+      req
+      .send()
+      .then((response) => {
+
+        if (!response.isOK())
+        {
+          return reject(new SearchEngineException('Unexpected response from Century 21 autocomplete webservice'));
+        }
+
+        const results = response.json();
+
+        if (Array.isArray(results) && results.length > 0)
+        {
+          return resolve(results[results.length - 1]);
+        }
+        resolve(null);
+      })
+      .catch((error) => reject(error));
     });
   }
 }

@@ -47,6 +47,16 @@ function getOfferLinks(linksSelector, nextButtonSelector)
   }
 }
 
+casper.on('error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
+casper.on('page.error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
 // Goes to the section of the website corresponding to the offer type
 url += (searchCriteria.offerType === offerTypes.PURCHASE) ? '/acheter' : '/louer';
 casper.start(url);
@@ -91,12 +101,19 @@ casper.then(function() {
 casper.thenClick('#btnRECHERCHE');
 
 // Scraps offers links
-casper.waitForSelector('.annoncesListeBien:first-of-type .annonce', function() {
+casper.waitForSelector('.annoncesListeBien:first-of-type .annonce',
 
-  casper.then(function() {
+  function() {
 
-    getOfferLinks('.annoncesListeBien:first-of-type .annonce .zone-text-loupe a', '.btnSUIV_PREC.suivant a');
-  });
-});
+    casper.then(function() {
+
+      getOfferLinks('.annoncesListeBien:first-of-type .annonce .zone-text-loupe a', '.btnSUIV_PREC.suivant a');
+    });
+  },
+  function onTimeout() {
+
+    casper.log('No offer found in Century 21 website', 'info');
+  }
+);
 
 casper.run();

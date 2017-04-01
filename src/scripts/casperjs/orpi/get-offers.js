@@ -12,7 +12,19 @@ const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.start();
+
+casper.on('error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
+casper.on('page.error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
 casper.each(urls, function(casper, link) {
+
   casper.thenOpen(link, function() {
 
     var offer = casper.evaluate(function(searchCriteria) {
@@ -45,4 +57,5 @@ casper.each(urls, function(casper, link) {
     }
   });
 });
+
 casper.run();
