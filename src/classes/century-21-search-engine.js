@@ -12,6 +12,7 @@ class Century21SearchEngine extends SearchEngine
       websiteUrl: 'https://www.century21.fr'
     });
   }
+
   findOffers(searchCriteria)
   {
     return new Promise((resolve, reject) => {
@@ -33,7 +34,7 @@ class Century21SearchEngine extends SearchEngine
                   return resolve(record.data);
                 }
 
-                this.findZipCodeAutocomplete(zipCode).then((data) => {
+                Century21SearchEngine.findZipCodeAutocomplete(zipCode).then((data) => {
 
                   cache.setData(cacheKey, JSON.stringify(data));
                   resolve(data);
@@ -63,7 +64,8 @@ class Century21SearchEngine extends SearchEngine
         });
     });
   }
-  findZipCodeAutocomplete(zipCode)
+
+  static findZipCodeAutocomplete(zipCode)
   {
     return new Promise((resolve, reject) => {
 
@@ -80,12 +82,11 @@ class Century21SearchEngine extends SearchEngine
 
         const results = response.json();
 
-        if (results.length > 0)
+        if (Array.isArray(results) && results.length > 0)
         {
-          const data = results[results.length - 1];
-
-          resolve(data);
+          return resolve(results[results.length - 1]);
         }
+        resolve(null);
       })
       .catch((error) => reject(error));
     });
