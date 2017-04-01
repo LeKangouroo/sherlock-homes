@@ -1,6 +1,4 @@
 const Cache = require('./cache');
-const Casper = require('./casper');
-const Offer = require('./offer');
 const Request = require('./request');
 const SearchEngine = require('./search-engine');
 const SearchEngineException = require('./search-criteria-exception');
