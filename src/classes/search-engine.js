@@ -60,6 +60,10 @@ class SearchEngine
             {
               return;
             }
+            if (message.type === 'error')
+            {
+              return reject(new SearchEngineException(this.getName(), message.data.message, message.data.trace));
+            }
             if (message.type === 'urls')
             {
               const urls = message.data;
@@ -103,6 +107,10 @@ class SearchEngine
               if (message === null)
               {
                 return;
+              }
+              if (message.type === 'error')
+              {
+                return reject(new SearchEngineException(this.getName(), message.data.message, message.data.trace));
               }
               if (message.type === 'offer')
               {
