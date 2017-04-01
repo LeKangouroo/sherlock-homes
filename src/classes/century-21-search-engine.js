@@ -33,28 +33,12 @@ class Century21SearchEngine extends SearchEngine
                   return resolve(record.data);
                 }
 
-                const req = new Request(`https://www.century21.fr/autocomplete/localite/?q=${zipCode}`);
+                this.findZipCodeAutocomplete(zipCode).then((data) => {
 
-                req
-                  .send()
-                  .then((response) => {
-
-                    if (!response.isOK())
-                    {
-                      return reject(new SearchEngineException('Unexpected response from Century 21 autocomplete webservice'));
-                    }
-
-                    const results = response.json();
-
-                    if (results.length > 0)
-                    {
-                      const data = results[results.length - 1];
-
-                      cache.setData(cacheKey, JSON.stringify(data));
-                      resolve(data);
-                    }
-                  })
-                  .catch((error) => reject(error));
+                  cache.setData(cacheKey, JSON.stringify(data));
+                  resolve(data);
+                })
+                .catch((error) => reject(error));
               })
               .catch((error) => reject(error));
           }));
@@ -77,6 +61,33 @@ class Century21SearchEngine extends SearchEngine
               reject(new SearchEngineException(`error while retrieving zip codes autocomplete data: ${error.toString()}`))
             });
         });
+    });
+  }
+  findZipCodeAutocomplete(zipCode)
+  {
+    return new Promise((resolve, reject) => {
+
+      const req = new Request(`https://www.century21.fr/autocomplete/localite/?q=${zipCode}`);
+
+      req
+      .send()
+      .then((response) => {
+
+        if (!response.isOK())
+        {
+          return reject(new SearchEngineException('Unexpected response from Century 21 autocomplete webservice'));
+        }
+
+        const results = response.json();
+
+        if (results.length > 0)
+        {
+          const data = results[results.length - 1];
+
+          resolve(data);
+        }
+      })
+      .catch((error) => reject(error));
     });
   }
 }
