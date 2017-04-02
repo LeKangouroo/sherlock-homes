@@ -71,6 +71,7 @@ class SearchEngine extends AbstractObservable
             {
               const urls = message.data;
 
+              this.notifyObservers('urls-found', urls);
               urls.forEach(url => {
 
                 cache
@@ -85,7 +86,7 @@ class SearchEngine extends AbstractObservable
                     {
                       offer = new Offer(offer.data);
 
-                      this.notifyObservers('offer:found', offer);
+                      this.notifyObservers('offer-found', offer);
                       offers.push(offer);
                     }
                   })
@@ -124,7 +125,7 @@ class SearchEngine extends AbstractObservable
 
                 let offer = new Offer(message.data);
 
-                this.notifyObservers('offer:found', offer);
+                this.notifyObservers('offer-found', offer);
                 offers.push(offer);
               }
             });
