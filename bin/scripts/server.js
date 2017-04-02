@@ -54,14 +54,19 @@ server.on('connection', (client) => {
 
             client.send(JSON.stringify({ type: 'find-offers:offer-found', data: offer }));
           });
-          se.findOffers(sc).then((offers) => {
+        });
 
-            client.send(JSON.stringify({ type: 'find-offers:complete', data: offers }));
-          })
-          .catch((err) => {
+        const promises = searchEngines.map((se) => se.findOffers(sc));
 
-            throw err;
-          });
+        Promise.all(promises).then((offers) => {
+
+          offers = [].concat.apply([], offers);
+
+          client.send(JSON.stringify({ type: 'find-offers:complete', data: offers }));
+        })
+        .catch((err) => {
+
+          throw err;
         });
       }
     }
