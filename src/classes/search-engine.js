@@ -1,3 +1,4 @@
+const AbstractObservable = require('./abstract-observable');
 const Cache = require('./cache');
 const CasperScript = require('./casper-script');
 const isString = require('lodash/isString');
@@ -6,10 +7,12 @@ const Offer = require('./offer');
 const SearchCriteria = require('./search-criteria');
 const SearchEngineException = require('./search-engine-exception');
 
-class SearchEngine
+class SearchEngine extends AbstractObservable
 {
   constructor(options)
   {
+    super();
+
     const DEFAULT_OPTIONS = {
       name: '',
       websiteUrl: ''
@@ -80,7 +83,10 @@ class SearchEngine
                     }
                     else
                     {
-                      offers.push(new Offer(offer.data));
+                      offer = new Offer(offer.data);
+
+                      this.notifyObservers('offer:found', offer);
+                      offers.push(offer);
                     }
                   })
                   .catch((error) => reject(error));
@@ -115,7 +121,11 @@ class SearchEngine
               if (message.type === 'offer')
               {
                 cache.saveOffer(message.data);
-                offers.push(new Offer(message.data));
+
+                let offer = new Offer(message.data);
+
+                this.notifyObservers('offer:found', offer);
+                offers.push(offer);
               }
             });
             offersCasperScript.addObserver('exit', (code) => {
