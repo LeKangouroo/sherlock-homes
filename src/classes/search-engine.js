@@ -1,15 +1,18 @@
+const AbstractObservable = require('./abstract-observable');
 const Cache = require('./cache');
-const Casper = require('./casper');
+const CasperScript = require('./casper-script');
 const isString = require('lodash/isString');
 const isUrl = require('validator/lib/isURL');
 const Offer = require('./offer');
 const SearchCriteria = require('./search-criteria');
 const SearchEngineException = require('./search-engine-exception');
 
-class SearchEngine
+class SearchEngine extends AbstractObservable
 {
   constructor(options)
   {
+    super();
+
     const DEFAULT_OPTIONS = {
       name: '',
       websiteUrl: ''
@@ -52,23 +55,23 @@ class SearchEngine
           const searchEngineName = this.getName();
           const newOffersUrls = [];
           const offers = [];
-          const childProcess1 = Casper.runScript(`${searchEngineName}/get-urls`, args);
+          const urlsCasperScript = new CasperScript(`${searchEngineName}/get-urls`, args);
 
-          childProcess1.stdout.pipe(process.stdout);
-          childProcess1.stderr.pipe(process.stdout);
-          childProcess1.stdout.on('data', (buffer) => {
-
-            const message = Casper.parseStreamBuffer(buffer);
+          urlsCasperScript.addObserver('data', (message) => {
 
             if (message === null)
             {
               return;
             }
-
+            if (message.type === 'error')
+            {
+              return reject(new SearchEngineException(this.getName(), message.data.message, message.data.trace));
+            }
             if (message.type === 'urls')
             {
               const urls = message.data;
 
+              this.notifyObservers('urls-found', urls);
               urls.forEach(url => {
 
                 cache
@@ -81,21 +84,22 @@ class SearchEngine
                     }
                     else
                     {
-                      offers.push(new Offer(offer.data));
+                      offer = new Offer(offer.data);
+
+                      this.notifyObservers('offer-found', offer);
+                      offers.push(offer);
                     }
                   })
                   .catch((error) => reject(error));
               });
             }
           });
-          childProcess1.on('exit', (code) => {
+          urlsCasperScript.addObserver('exit', (code) => {
 
             if (code !== 0)
             {
               return reject(new SearchEngineException(`error during execution of get-urls CasperJS script in ${this.getName()} class`));
             }
-
-
             if (newOffersUrls.length === 0)
             {
               return resolve(offers);
@@ -103,25 +107,29 @@ class SearchEngine
 
             args.push(`--urls=${JSON.stringify(newOffersUrls)}`);
 
-            const childProcess2 = Casper.runScript(`${searchEngineName}/get-offers`, args);
+            const offersCasperScript = new CasperScript(`${searchEngineName}/get-offers`, args);
 
-            childProcess2.stdout.pipe(process.stdout);
-            childProcess2.stderr.pipe(process.stdout);
-            childProcess2.stdout.on('data', (buffer) => {
-
-              const message = Casper.parseStreamBuffer(buffer);
+            offersCasperScript.addObserver('data', (message) => {
 
               if (message === null)
               {
                 return;
               }
+              if (message.type === 'error')
+              {
+                return reject(new SearchEngineException(this.getName(), message.data.message, message.data.trace));
+              }
               if (message.type === 'offer')
               {
                 cache.saveOffer(message.data);
-                offers.push(new Offer(message.data));
+
+                let offer = new Offer(message.data);
+
+                this.notifyObservers('offer-found', offer);
+                offers.push(offer);
               }
             });
-            childProcess2.on('exit', (code) => {
+            offersCasperScript.addObserver('exit', (code) => {
 
               if (code !== 0)
               {

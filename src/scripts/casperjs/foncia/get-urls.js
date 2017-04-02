@@ -42,6 +42,16 @@ function getOfferLinks(linksSelector, nextButtonSelector)
   }
 }
 
+casper.on('error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
+casper.on('page.error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
 // Loads search engine's website url
 casper.start(searchEngine.websiteUrl);
 

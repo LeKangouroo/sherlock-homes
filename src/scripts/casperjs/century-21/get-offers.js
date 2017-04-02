@@ -12,14 +12,25 @@ const casper = require('casper').create({
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
-casper.start();
-casper.each(urls, function(casper, link) {
+casper.on('error', function(message, trace) {
 
-  casper.thenOpen(link, function() {
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
+casper.on('page.error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
+casper.start();
+
+casper.eachThen(urls, function(response) {
+
+  casper.open(response.data).then(function() {
 
     var offer = casper.evaluate(function(searchCriteria){
 
-      var REGEXP_AGENCY_FEES = /Honoraires locataire : ((((\d{1,3})( \d{3})*)|(\d+))(,\d+)?) €/;
+      var REGEXP_AGENCY_FEES = /Honoraires charge locataire : ((((\d{1,3})( \d{3})*)|(\d+))(,\d+)?) €/;
       var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
       var REGEXP_PRICE = /((((\d{1,3})( \d{3})*)|(\d+))(,\d+)?) €/;
       var REGEXP_SURFACE_AREA = /Surface habitable : ([0-9]+,?[0-9]*) m2/;

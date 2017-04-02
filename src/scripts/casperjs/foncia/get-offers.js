@@ -15,8 +15,21 @@ const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.start();
+
+casper.on('error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
+casper.on('page.error', function(message, trace) {
+
+  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+});
+
 casper.eachThen(urls, function(response) {
+
   casper.open(response.data).then(function() {
+
     casper.waitForSelector('.Footer', function() {
 
       var offer = casper.evaluate(function(searchCriteria) {
@@ -51,4 +64,5 @@ casper.eachThen(urls, function(response) {
     });
   });
 });
+
 casper.run();

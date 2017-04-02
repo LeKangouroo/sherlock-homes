@@ -1,101 +1,78 @@
 const argv = require('../usage/usage').argv;
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
-const Hapi = require('hapi');
 const Offer = require('../../src/classes/offer');
 const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
 const SearchCriteria = require('../../src/classes/search-criteria');
+const Websocket = require('ws');
 
-const server = new Hapi.Server();
-
-server.connection({
-  host: argv.host,
-  port: argv.port,
-  routes: {
-    cors: true
-  }
+const server = new Websocket.Server({
+  host:               argv.host,
+  port:               argv.port,
+  perMessageDeflate:  false,
 });
 
-server.start((err) => {
+server.on('listening', () => {
 
-  if (err)
-  {
-    throw err;
-  }
-  console.log(`[Sherlock] Server running at: ${server.info.uri}`);
+  console.log('listening on port ' + argv.port);
 });
 
-server.route({
+server.on('connection', (client) => {
 
-  method: 'GET',
-  path: '/',
-  handler: (request, reply) => {
+  client.on('message', (message) => {
 
-    reply('Welcome to Sherlock Homes API');
-  }
-});
-
-server.route({
-
-  method: 'POST',
-  path: '/',
-  handler: (request, reply) => {
+    console.log('message', message);
 
     try
     {
-      const criteria = request.payload;
+      message = JSON.parse(message);
 
-      if (criteria.offerType)
+      if (typeof message.type !== 'string')
       {
-        criteria.offerType = criteria.offerType === 'purchase' ? Offer.types.PURCHASE : Offer.types.RENT;
+        return client.send(JSON.stringify({ type: 'error', data: 'invalid message type' }));
       }
+      if (typeof message.data === 'undefined')
+      {
+        return client.send(JSON.stringify({ type: 'error', data: 'invalid message data' }));
+      }
+      if (message.type === 'find-offers')
+      {
+        const sc = new SearchCriteria(message.data);
+        const searchEngines = [
+          new Century21SearchEngine(),
+          new FonciaSearchEngine(),
+          new OrpiSearchEngine()
+        ];
 
-      const sc = new SearchCriteria(criteria);
-      const se1 = new FonciaSearchEngine();
-      const se2 = new OrpiSearchEngine();
-      const se3 = new Century21SearchEngine();
+        searchEngines.forEach((se) => {
 
-      const search = Promise.all([
-        se1.findOffers(sc),
-        se2.findOffers(sc),
-        se3.findOffers(sc)
-      ]);
+          se.addObserver('urls-found', (urls) => {
 
-      search.then((offers) => {
+            client.send(JSON.stringify({ type: 'find-offers:new-results-count', data: urls.length }));
+          });
+          se.addObserver('offer-found', (offer) => {
 
-        let response;
-
-        offers = [].concat.apply([], offers);
-
-        if (offers.length === 0)
-        {
-          response = reply();
-          response.statusCode = 204;
-        }
-        else
-        {
-          response = reply(JSON.stringify(offers));
-          response.statusCode = 200;
-        }
-      })
-      .catch((error) => {
-
-        const response = reply({
-          message: error.getMessage(),
-          name: error.getName()
+            client.send(JSON.stringify({ type: 'find-offers:offer-found', data: offer }));
+          });
         });
 
-        response.statusCode = 500;
-      });
-    }
-    catch (error)
-    {
-      const response = reply({
-        message: error.getMessage(),
-        name: error.getName()
-      });
+        const promises = searchEngines.map((se) => se.findOffers(sc));
 
-      response.statusCode = 400;
+        Promise.all(promises).then((offers) => {
+
+          offers = [].concat.apply([], offers);
+
+          client.send(JSON.stringify({ type: 'find-offers:complete', data: offers }));
+        })
+        .catch((err) => {
+
+          throw err;
+        });
+      }
     }
-  }
+    catch (err)
+    {
+      client.send(JSON.stringify({ type: 'error', data: err.toString() }));
+    }
+  });
 });
