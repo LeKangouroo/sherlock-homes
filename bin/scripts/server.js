@@ -66,13 +66,13 @@ server.on('connection', (client) => {
         })
         .catch((err) => {
 
-          throw err;
+          client.send(JSON.stringify({ type: 'error', data: err }));
         });
       }
     }
     catch (err)
     {
-      client.send(JSON.stringify({ type: 'error', data: err.toString() }));
+      client.send(JSON.stringify({ type: 'error', data: err }));
     }
   });
 });
