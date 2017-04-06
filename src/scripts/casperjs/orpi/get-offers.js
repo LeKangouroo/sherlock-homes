@@ -29,7 +29,7 @@ casper.each(urls, function(casper, link) {
 
     var offer = casper.evaluate(function(searchCriteria) {
 
-      var REGEXP_AGENCY_FEES = /Honoraires TTC locataire : ((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?) €/;
+      var REGEXP_AGENCY_FEES = /Honoraires TTC à la charge du locataire : ((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?) €/;
       var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
       var REGEXP_PRICE = /((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?) €/;
       var REGEXP_SURFACE_AREA = /([0-9]+) m2/;
