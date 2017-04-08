@@ -1,7 +1,6 @@
 const argv = require('../usage/usage').argv;
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
-const Offer = require('../../src/classes/offer');
 const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
 const SearchCriteria = require('../../src/classes/search-criteria');
 const Websocket = require('ws');
@@ -20,8 +19,6 @@ server.on('listening', () => {
 server.on('connection', (client) => {
 
   client.on('message', (message) => {
-
-    console.log('message', message);
 
     try
     {
