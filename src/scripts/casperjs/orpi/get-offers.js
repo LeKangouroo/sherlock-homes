@@ -8,6 +8,9 @@ const casper = require('casper').create({
     height: 1080
   }
 });
+
+var currentURL;
+
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
@@ -15,17 +18,18 @@ casper.start();
 
 casper.on('error', function(message, trace) {
 
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+  console.log(JSON.stringify({ type: 'error', data: { message: message, url: currentURL, trace: trace } }));
 });
 
 casper.on('page.error', function(message, trace) {
 
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+  console.log(JSON.stringify({ type: 'error', data: { message: message, url: currentURL, trace: trace } }));
 });
 
 casper.each(urls, function(casper, link) {
 
-  casper.thenOpen(link, function() {
+  currentURL = link;
+  casper.thenOpen(currentURL, function() {
 
     var offer = casper.evaluate(function(searchCriteria) {
 

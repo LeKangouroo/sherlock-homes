@@ -5,14 +5,15 @@ class AbstractException
 {
   /**
    * Constructor
-   * @param {String} message the exception message
-   * @param {String} stack the stack trace
+   * @param {String} message - the exception message
+   * @param {*} data - optional data passed to the exception to help debugging
    */
-  constructor(message, stack = null) {
+  constructor(message, data = null) {
 
+    this.data = data;
     this.message = message;
     this.name = this.constructor.name;
-    this.stack = (stack) ? stack : new Error(message).stack;
+    this.stack = new Error(message).stack;
   }
 
   /**

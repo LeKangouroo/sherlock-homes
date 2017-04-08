@@ -2,9 +2,9 @@ const AbstractException = require('./abstract-exception');
 
 class SearchEngineException extends AbstractException
 {
-  constructor(searchEngine, message, stack = null)
+  constructor(searchEngine, message, data = null)
   {
-    super(message, stack);
+    super(message, data);
 
     this.searchEngine = searchEngine;
   }
