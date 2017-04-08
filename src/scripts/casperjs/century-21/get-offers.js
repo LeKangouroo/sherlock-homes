@@ -45,6 +45,7 @@ casper.eachThen(urls, function(response) {
         agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1].replace(',', '.').replace(' ', '')),
         isFurnished: REGEXP_IS_FURNISHED.test(description),
         price: Number(priceDetails.match(REGEXP_PRICE)[1].replace(',', '.').replace(' ', '')),
+        source: "Century 21",
         surfaceArea: Number(offerDetails.match(REGEXP_SURFACE_AREA)[1].replace(',', '.')),
         type: searchCriteria.offerType,
         url: window.location.href,

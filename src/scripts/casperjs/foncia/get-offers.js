@@ -52,6 +52,7 @@ casper.eachThen(urls, function(response) {
           agencyFees: agencyFees,
           isFurnished: isFurnished,
           price: price,
+          source: "FONCIA",
           surfaceArea: surfaceArea,
           type: searchCriteria.offerType,
           url: window.location.href,

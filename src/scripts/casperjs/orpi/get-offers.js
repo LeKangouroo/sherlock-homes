@@ -44,6 +44,7 @@ casper.each(urls, function(casper, link) {
         agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1].replace(' ', '')),
         isFurnished: REGEXP_IS_FURNISHED.test(description),
         price: Number(priceDetails.match(REGEXP_PRICE)[1].replace(' ', '')),
+        source: "ORPI",
         surfaceArea: Number(locationDetails.match(REGEXP_SURFACE_AREA)[1]),
         type: searchCriteria.offerType,
         url: window.location.href,
