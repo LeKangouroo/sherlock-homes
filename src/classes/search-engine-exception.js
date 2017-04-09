@@ -10,7 +10,7 @@ class SearchEngineException extends AbstractException
   }
   toString() {
 
-    return `[${this.searchEngine}] ${this.name}: ${this.message}`;
+    return `[${this.searchEngine.getName()}] ${this.name}: ${this.message}`;
   }
 }
 

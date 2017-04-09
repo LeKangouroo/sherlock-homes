@@ -21,15 +21,15 @@ class SearchEngine extends AbstractObservable
 
     if (this.constructor.name === 'SearchEngine')
     {
-      throw new SearchEngineException(this.getName(), 'SearchEngine class cannot be instantiated as a concrete class');
+      throw new SearchEngineException(this, 'SearchEngine class cannot be instantiated as a concrete class');
     }
     if (!SearchEngine.isNameValid(opts.name))
     {
-      throw new SearchEngineException(this.getName(), 'invalid search engine name');
+      throw new SearchEngineException(this, 'invalid search engine name');
     }
     if (!SearchEngine.isWebsiteUrlValid(opts.websiteUrl))
     {
-      throw new SearchEngineException(this.getName(), 'invalid search engine website url');
+      throw new SearchEngineException(this, 'invalid search engine website url');
     }
     this.name = opts.name;
     this.websiteUrl = opts.websiteUrl;
@@ -40,7 +40,7 @@ class SearchEngine extends AbstractObservable
 
       if (!(searchCriteria instanceof SearchCriteria))
       {
-        return reject(new SearchEngineException(this.getName(), 'invalid argument. expected an instance of the SearchCriteria'));
+        return reject(new SearchEngineException(this, 'invalid argument. expected an instance of the SearchCriteria'));
       }
 
       const DEFAULT_OPTIONS = {
@@ -90,7 +90,7 @@ class SearchEngine extends AbstractObservable
             }
             if (message.type === 'error')
             {
-              return fail(new SearchEngineException(this.getName(), 'error during offers URLs parsing', message.data));
+              return fail(new SearchEngineException(this, 'error during offers URLs parsing', message.data));
             }
             if (message.type === 'urls')
             {
@@ -122,7 +122,7 @@ class SearchEngine extends AbstractObservable
 
             if (code !== 0)
             {
-              return fail(new SearchEngineException(this.getName(), 'error during execution of get-urls CasperJS script'));
+              return fail(new SearchEngineException(this, 'error during execution of get-urls CasperJS script'));
             }
             if (newOffersUrls.length === 0)
             {
@@ -141,7 +141,7 @@ class SearchEngine extends AbstractObservable
               }
               if (message.type === 'error')
               {
-                return fail(new SearchEngineException(this.getName(), 'error during offer analysis', message.data));
+                return fail(new SearchEngineException(this, 'error during offer analysis', message.data));
               }
               if (message.type === 'offer')
               {
@@ -157,7 +157,7 @@ class SearchEngine extends AbstractObservable
 
               if (code !== 0)
               {
-                return fail(new SearchEngineException(this.getName(), 'error during execution of get-offers CasperJS script'));
+                return fail(new SearchEngineException(this, 'error during execution of get-offers CasperJS script'));
               }
               return resolve(offers);
             });
