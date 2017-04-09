@@ -1,28 +1,48 @@
+const path = require('path');
 const winston = require('winston');
 
 class Logger
 {
-  static getInstance()
+  static getInstance(options = {})
   {
     if (!this.instance)
     {
-      this.instance = new Logger();
+      this.instance = new Logger(options);
     }
     return this.instance;
   }
-  constructor()
+  constructor(options = {})
   {
+    const DEFAULT_OPTIONS = {
+      file: {
+        name: 'sherlock.log',
+        directory: process.cwd()
+      }
+    };
+
+    const opts = Object.assign({}, DEFAULT_OPTIONS, options);
+
     this.winston = new (winston.Logger)({
       transports: [
         new (winston.transports.Console)({
+          colorize: true,
           humanReadableUnhandledException: true,
+          level: 'debug',
           prettyPrint: true,
+          timestamp: true
+        }),
+        new (winston.transports.File)({
+          colorize: false,
+          filename: path.resolve(opts.file.directory, opts.file.name),
+          json: false,
+          level: 'debug',
+          maxFiles: 5,
+          maxsize: 1000,
+          tailable: true,
           timestamp: true
         })
       ]
     });
-    this.winston.level = 'debug';
-    this.winston.cli();
   }
   debug(message, data = null)
   {
