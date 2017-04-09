@@ -37,7 +37,7 @@ class Logger
           json: false,
           level: 'debug',
           maxFiles: 5,
-          maxsize: 1000,
+          maxsize: 1000000, // NOTE: 1 000 000 bytes = 1 Mbytes
           tailable: true,
           timestamp: true
         })
