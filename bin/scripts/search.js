@@ -3,6 +3,7 @@ const Cache = require('../../src/classes/cache');
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
 const json2csv = require('json2csv');
+const Logger = require('../../src/classes/logger');
 const Offer = require('../../src/classes/offer');
 const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
 const SearchCriteria = require('../../src/classes/search-criteria');
@@ -13,6 +14,12 @@ function cacheServerDisconnect()
   {
     Cache.getInstance().then((instance) => instance.disconnect());
   }
+}
+
+function fail(error)
+{
+  Logger.getInstance().error(error.toString(), error);
+  process.exit(1);
 }
 
 try
@@ -60,11 +67,11 @@ try
     .catch((error) => {
 
       cacheServerDisconnect();
-      throw error;
+      fail(error);
     });
 }
 catch (error)
 {
   cacheServerDisconnect();
-  throw error;
+  fail(error);
 }

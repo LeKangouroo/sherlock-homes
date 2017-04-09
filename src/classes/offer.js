@@ -18,6 +18,7 @@ class Offer
       agencyFees: null,
       isFurnished: null,
       price: null,
+      source: null,
       surfaceArea: null,
       type: null,
       url: null,
@@ -36,6 +37,10 @@ class Offer
     if (!Offer.isPriceValid(opts.price))
     {
       throw new OfferException('invalid price');
+    }
+    if (!Offer.isSourceValid(opts.source))
+    {
+      throw new OfferException('invalid source');
     }
     if (!Offer.isSurfaceAreaValid(opts.surfaceArea))
     {
@@ -56,6 +61,7 @@ class Offer
     this.agencyFees = opts.agencyFees;
     this.isFurnished = opts.isFurnished;
     this.price = opts.price;
+    this.source = opts.source;
     this.surfaceArea = opts.surfaceArea;
     this.type = opts.type;
     this.url = opts.url;
@@ -68,6 +74,10 @@ class Offer
   getPrice()
   {
     return this.price;
+  }
+  getSource()
+  {
+    return this.source;
   }
   getSurfaceArea()
   {
@@ -100,6 +110,10 @@ class Offer
   static isPriceValid(price)
   {
     return (isNumber(price) && isFinite(price) && price > 0);
+  }
+  static isSourceValid(source)
+  {
+    return (isString(source) && source.length > 0);
   }
   static isSurfaceAreaValid(surfaceArea)
   {

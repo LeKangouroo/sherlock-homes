@@ -1,7 +1,7 @@
 const Cache = require('./cache');
 const Request = require('./request');
 const SearchEngine = require('./search-engine');
-const SearchEngineException = require('./search-criteria-exception');
+const SearchEngineException = require('./search-engine-exception');
 
 class Century21SearchEngine extends SearchEngine
 {
@@ -13,7 +13,7 @@ class Century21SearchEngine extends SearchEngine
     });
   }
 
-  findOffers(searchCriteria)
+  findOffers(searchCriteria, options = {})
   {
     return new Promise((resolve, reject) => {
 
@@ -50,18 +50,20 @@ class Century21SearchEngine extends SearchEngine
 
               if (zipCodes.length === 0)
               {
-                throw new SearchEngineException('no matching zip code');
+                throw new SearchEngineException(this, `no matching zip code for values = ${searchCriteria.zipCodes.join(', ')}`);
               }
+              const opts = Object.assign({}, { args: [`--zip-codes=${JSON.stringify(zipCodes)}`] }, options);
               super
-                .findOffers(searchCriteria, { args: [`--zip-codes=${JSON.stringify(zipCodes)}`] })
+                .findOffers(searchCriteria, opts)
                 .then((offers) => resolve(offers))
                 .catch((error) => reject(error));
             })
             .catch((error) => {
 
-              reject(new SearchEngineException(`error while retrieving zip codes autocomplete data: ${error.toString()}`))
+              reject(new SearchEngineException(this, 'error while retrieving zip codes autocomplete data', error))
             });
-        });
+        })
+        .catch((error) => reject(new SearchEngineException(this, 'error while retrieving cache client instance', error)));
     });
   }
 
@@ -77,7 +79,7 @@ class Century21SearchEngine extends SearchEngine
 
         if (!response.isOK())
         {
-          return reject(new SearchEngineException('Unexpected response from Century 21 autocomplete webservice'));
+          return reject(new SearchEngineException(this, 'Unexpected response from Century 21 autocomplete webservice'));
         }
 
         const results = response.json();

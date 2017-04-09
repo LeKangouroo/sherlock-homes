@@ -9,24 +9,27 @@ const casper = require('casper').create({
   }
 });
 
+var currentURL;
+
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.on('error', function(message, trace) {
 
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+  console.log(JSON.stringify({ type: 'error', data: { message: message, url: currentURL, trace: trace } }));
 });
 
 casper.on('page.error', function(message, trace) {
 
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+  console.log(JSON.stringify({ type: 'error', data: { message: message, url: currentURL, trace: trace } }));
 });
 
 casper.start();
 
 casper.eachThen(urls, function(response) {
 
-  casper.open(response.data).then(function() {
+  currentURL = response.data;
+  casper.open(currentURL).then(function() {
 
     var offer = casper.evaluate(function(searchCriteria){
 
@@ -45,6 +48,7 @@ casper.eachThen(urls, function(response) {
         agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1].replace(',', '.').replace(' ', '')),
         isFurnished: REGEXP_IS_FURNISHED.test(description),
         price: Number(priceDetails.match(REGEXP_PRICE)[1].replace(',', '.').replace(' ', '')),
+        source: "Century 21",
         surfaceArea: Number(offerDetails.match(REGEXP_SURFACE_AREA)[1].replace(',', '.')),
         type: searchCriteria.offerType,
         url: window.location.href,

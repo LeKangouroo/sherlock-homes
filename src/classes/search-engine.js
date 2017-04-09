@@ -21,15 +21,15 @@ class SearchEngine extends AbstractObservable
 
     if (this.constructor.name === 'SearchEngine')
     {
-      throw new SearchEngineException('SearchEngine class cannot be instantiated as a concrete class');
+      throw new SearchEngineException(this, 'SearchEngine class cannot be instantiated as a concrete class');
     }
     if (!SearchEngine.isNameValid(opts.name))
     {
-      throw new SearchEngineException('invalid search engine name');
+      throw new SearchEngineException(this, 'invalid search engine name');
     }
     if (!SearchEngine.isWebsiteUrlValid(opts.websiteUrl))
     {
-      throw new SearchEngineException('invalid search engine website url');
+      throw new SearchEngineException(this, 'invalid search engine website url');
     }
     this.name = opts.name;
     this.websiteUrl = opts.websiteUrl;
@@ -40,8 +40,31 @@ class SearchEngine extends AbstractObservable
 
       if (!(searchCriteria instanceof SearchCriteria))
       {
-        return reject(new SearchEngineException('invalid argument. expected an instance of the SearchCriteria'));
+        return reject(new SearchEngineException(this, 'invalid argument. expected an instance of the SearchCriteria'));
       }
+
+      const DEFAULT_OPTIONS = {
+        args: null,
+        interruptOnError: true
+      };
+
+      options = Object.assign({}, DEFAULT_OPTIONS, options);
+
+      let fail = function({ reject, options, notify }, error) {
+
+        notify('error', error);
+        if (options.interruptOnError)
+        {
+          reject(error);
+        }
+      };
+
+      fail = fail.bind(null, {
+        notify: this.notifyObservers.bind(this),
+        reject: reject,
+        options: options
+      });
+
       Cache
         .getInstance()
         .then((cache) => {
@@ -65,7 +88,7 @@ class SearchEngine extends AbstractObservable
             }
             if (message.type === 'error')
             {
-              return reject(new SearchEngineException(this.getName(), message.data.message, message.data.trace));
+              return fail(new SearchEngineException(this, 'error during offers URLs parsing', message.data));
             }
             if (message.type === 'urls')
             {
@@ -85,12 +108,11 @@ class SearchEngine extends AbstractObservable
                     else
                     {
                       offer = new Offer(offer.data);
-
                       this.notifyObservers('offer-found', offer);
                       offers.push(offer);
                     }
                   })
-                  .catch((error) => reject(error));
+                  .catch((error) => fail(error));
               });
             }
           });
@@ -98,7 +120,7 @@ class SearchEngine extends AbstractObservable
 
             if (code !== 0)
             {
-              return reject(new SearchEngineException(`error during execution of get-urls CasperJS script in ${this.getName()} class`));
+              return fail(new SearchEngineException(this, 'error during execution of get-urls CasperJS script'));
             }
             if (newOffersUrls.length === 0)
             {
@@ -117,7 +139,7 @@ class SearchEngine extends AbstractObservable
               }
               if (message.type === 'error')
               {
-                return reject(new SearchEngineException(this.getName(), message.data.message, message.data.trace));
+                return fail(new SearchEngineException(this, 'error during offer analysis', message.data));
               }
               if (message.type === 'offer')
               {
@@ -133,13 +155,13 @@ class SearchEngine extends AbstractObservable
 
               if (code !== 0)
               {
-                return reject(new SearchEngineException(`error during execution of get-offers CasperJS script in ${this.getName()} class`));
+                return fail(new SearchEngineException(this, 'error during execution of get-offers CasperJS script'));
               }
               return resolve(offers);
             });
           });
         })
-        .catch((error) => reject(error));
+        .catch((error) => reject(new SearchEngineException(this, 'error while retrieving cache client instance', error)));
     });
   }
   getName()

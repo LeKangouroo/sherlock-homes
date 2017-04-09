@@ -8,6 +8,9 @@ const casper = require('casper').create({
     height: 1080
   }
 });
+
+var currentURL;
+
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
@@ -15,17 +18,18 @@ casper.start();
 
 casper.on('error', function(message, trace) {
 
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+  console.log(JSON.stringify({ type: 'error', data: { message: message, url: currentURL, trace: trace } }));
 });
 
 casper.on('page.error', function(message, trace) {
 
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
+  console.log(JSON.stringify({ type: 'error', data: { message: message, url: currentURL, trace: trace } }));
 });
 
 casper.each(urls, function(casper, link) {
 
-  casper.thenOpen(link, function() {
+  currentURL = link;
+  casper.thenOpen(currentURL, function() {
 
     var offer = casper.evaluate(function(searchCriteria) {
 
@@ -44,6 +48,7 @@ casper.each(urls, function(casper, link) {
         agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1].replace(' ', '')),
         isFurnished: REGEXP_IS_FURNISHED.test(description),
         price: Number(priceDetails.match(REGEXP_PRICE)[1].replace(' ', '')),
+        source: "ORPI",
         surfaceArea: Number(locationDetails.match(REGEXP_SURFACE_AREA)[1]),
         type: searchCriteria.offerType,
         url: window.location.href,
