@@ -3,6 +3,7 @@ const Cache = require('../../src/classes/cache');
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
 const json2csv = require('json2csv');
+const Logger = require('../../src/classes/logger');
 const Offer = require('../../src/classes/offer');
 const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
 const SearchCriteria = require('../../src/classes/search-criteria');
@@ -17,7 +18,7 @@ function cacheServerDisconnect()
 
 function fail(error)
 {
-  console.error(error);
+  Logger.getInstance().error(error.toString(), error);
   process.exit(1);
 }
 
@@ -32,11 +33,10 @@ try
   const se1 = new FonciaSearchEngine();
   const se2 = new OrpiSearchEngine();
   const se3 = new Century21SearchEngine();
-  const seOptions = { outputErrors: false };
   const search = Promise.all([
-    se1.findOffers(sc, seOptions),
-    se2.findOffers(sc, seOptions),
-    se3.findOffers(sc, seOptions)
+    se1.findOffers(sc),
+    se2.findOffers(sc),
+    se3.findOffers(sc)
   ]);
 
   search
