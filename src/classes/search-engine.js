@@ -163,7 +163,7 @@ class SearchEngine extends AbstractObservable
             });
           });
         })
-        .catch((error) => fail(error));
+        .catch((error) => reject(new SearchEngineException(this, 'error while retrieving cache client instance', error)));
     });
   }
   getName()

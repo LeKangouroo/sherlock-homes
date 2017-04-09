@@ -61,7 +61,8 @@ class Century21SearchEngine extends SearchEngine
 
               reject(new SearchEngineException(this, 'error while retrieving zip codes autocomplete data', error))
             });
-        });
+        })
+        .catch((error) => reject(new SearchEngineException(this, 'error while retrieving cache client instance', error)));
     });
   }
 
