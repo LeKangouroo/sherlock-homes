@@ -45,27 +45,25 @@ class SearchEngine extends AbstractObservable
 
       const DEFAULT_OPTIONS = {
         args: null,
-        interruptOnError: true,
-        outputErrors: true
+        interruptOnError: true
       };
 
       options = Object.assign({}, DEFAULT_OPTIONS, options);
 
-      let fail = function(reject, options, notify, error) {
+      let fail = function({ reject, options, notify }, error) {
 
         notify('error', error);
-        if (options.outputErrors)
-        {
-          console.error(error);
-        }
         if (options.interruptOnError)
         {
           reject(error);
         }
-
       };
 
-      fail = fail.bind(null, reject, options, this.notifyObservers.bind(this));
+      fail = fail.bind(null, {
+        notify: this.notifyObservers.bind(this),
+        reject: reject,
+        options: options
+      });
 
       Cache
         .getInstance()

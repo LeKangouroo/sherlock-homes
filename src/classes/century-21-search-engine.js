@@ -13,7 +13,7 @@ class Century21SearchEngine extends SearchEngine
     });
   }
 
-  findOffers(searchCriteria)
+  findOffers(searchCriteria, options = {})
   {
     return new Promise((resolve, reject) => {
 
@@ -52,8 +52,9 @@ class Century21SearchEngine extends SearchEngine
               {
                 throw new SearchEngineException(this, `no matching zip code for values = ${searchCriteria.zipCodes.join(', ')}`);
               }
+              const opts = Object.assign({}, { args: [`--zip-codes=${JSON.stringify(zipCodes)}`] }, options);
               super
-                .findOffers(searchCriteria, { args: [`--zip-codes=${JSON.stringify(zipCodes)}`] })
+                .findOffers(searchCriteria, opts)
                 .then((offers) => resolve(offers))
                 .catch((error) => reject(error));
             })

@@ -17,6 +17,15 @@ class AbstractException
   }
 
   /**
+   * Returns the data associated to the exception
+   * @returns {*}
+   */
+  getData() {
+
+    return this.data;
+  }
+
+  /**
    * Returns the exception's message
    * @returns {String} the message
    */
