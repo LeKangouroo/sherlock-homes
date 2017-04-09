@@ -13,7 +13,6 @@ class SearchEngine extends AbstractObservable
   {
     super();
 
-    // TODO: improve default options definition
     const DEFAULT_OPTIONS = {
       name: '',
       websiteUrl: ''
@@ -35,7 +34,7 @@ class SearchEngine extends AbstractObservable
     this.name = opts.name;
     this.websiteUrl = opts.websiteUrl;
   }
-  findOffers(searchCriteria, options = { args: null, interruptOnError: true })
+  findOffers(searchCriteria, options = {})
   {
     return new Promise((resolve, reject) => {
 
@@ -43,6 +42,31 @@ class SearchEngine extends AbstractObservable
       {
         return reject(new SearchEngineException(this.getName(), 'invalid argument. expected an instance of the SearchCriteria'));
       }
+
+      const DEFAULT_OPTIONS = {
+        args: null,
+        interruptOnError: true,
+        outputErrors: true
+      };
+
+      options = Object.assign({}, DEFAULT_OPTIONS, options);
+
+      let fail = function(reject, options, notify, error) {
+
+        notify('error', error);
+        if (options.outputErrors)
+        {
+          console.error(error);
+        }
+        if (options.interruptOnError)
+        {
+          reject(error);
+        }
+
+      };
+
+      fail = fail.bind(null, reject, options, this.notifyObservers.bind(this));
+
       Cache
         .getInstance()
         .then((cache) => {
@@ -66,15 +90,7 @@ class SearchEngine extends AbstractObservable
             }
             if (message.type === 'error')
             {
-              let error = new SearchEngineException(this.getName(), 'error during offers URLs parsing', message.data);
-
-              console.error(error);
-              this.notifyObservers('error', error);
-              if (options.interruptOnError)
-              {
-                reject(error);
-              }
-              return;
+              return fail(new SearchEngineException(this.getName(), 'error during offers URLs parsing', message.data));
             }
             if (message.type === 'urls')
             {
@@ -98,15 +114,7 @@ class SearchEngine extends AbstractObservable
                       offers.push(offer);
                     }
                   })
-                  .catch((error) => {
-
-                    console.error(error);
-                    this.notifyObservers('error', error);
-                    if (options.interruptOnError)
-                    {
-                      reject(error);
-                    }
-                  });
+                  .catch((error) => fail(error));
               });
             }
           });
@@ -114,15 +122,7 @@ class SearchEngine extends AbstractObservable
 
             if (code !== 0)
             {
-              let error = new SearchEngineException(this.getName(), 'error during execution of get-urls CasperJS script');
-
-              console.error(error);
-              this.notifyObservers('error', error);
-              if (options.interruptOnError)
-              {
-                reject(error);
-              }
-              return;
+              return fail(new SearchEngineException(this.getName(), 'error during execution of get-urls CasperJS script'));
             }
             if (newOffersUrls.length === 0)
             {
@@ -141,15 +141,7 @@ class SearchEngine extends AbstractObservable
               }
               if (message.type === 'error')
               {
-                let error = new SearchEngineException(this.getName(), 'error during offer analysis', message.data);
-
-                console.error(error);
-                this.notifyObservers('error', error);
-                if (options.interruptOnError)
-                {
-                  reject(error);
-                }
-                return;
+                return fail(new SearchEngineException(this.getName(), 'error during offer analysis', message.data));
               }
               if (message.type === 'offer')
               {
@@ -165,29 +157,13 @@ class SearchEngine extends AbstractObservable
 
               if (code !== 0)
               {
-                let error = new SearchEngineException(this.getName(), 'error during execution of get-offers CasperJS script');
-
-                console.error(error);
-                this.notifyObservers('error', error);
-                if (options.interruptOnError)
-                {
-                  reject(error);
-                }
-                return;
+                return fail(new SearchEngineException(this.getName(), 'error during execution of get-offers CasperJS script'));
               }
               return resolve(offers);
             });
           });
         })
-        .catch((error) => {
-
-          console.error(error);
-          this.notifyObservers('error', error);
-          if (options.interruptOnError)
-          {
-            reject(error);
-          }
-        });
+        .catch((error) => fail(error));
     });
   }
   getName()

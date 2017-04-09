@@ -15,6 +15,12 @@ function cacheServerDisconnect()
   }
 }
 
+function fail(error)
+{
+  console.error(error);
+  process.exit(1);
+}
+
 try
 {
   const sc = new SearchCriteria({
@@ -26,10 +32,11 @@ try
   const se1 = new FonciaSearchEngine();
   const se2 = new OrpiSearchEngine();
   const se3 = new Century21SearchEngine();
+  const seOptions = { outputErrors: false };
   const search = Promise.all([
-    se1.findOffers(sc),
-    se2.findOffers(sc),
-    se3.findOffers(sc)
+    se1.findOffers(sc, seOptions),
+    se2.findOffers(sc, seOptions),
+    se3.findOffers(sc, seOptions)
   ]);
 
   search
@@ -60,11 +67,11 @@ try
     .catch((error) => {
 
       cacheServerDisconnect();
-      throw error;
+      fail(error);
     });
 }
 catch (error)
 {
   cacheServerDisconnect();
-  throw error;
+  fail(error);
 }
