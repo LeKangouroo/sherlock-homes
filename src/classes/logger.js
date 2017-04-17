@@ -1,5 +1,6 @@
 const path = require('path');
 const winston = require('winston');
+const WinstonEmailTransport = require('./winston-email-transport');
 
 class Logger
 {
@@ -14,15 +15,24 @@ class Logger
   constructor(options = {})
   {
     const DEFAULT_OPTIONS = {
+      email: {
+        enabled: false,
+        from: null,
+        to: [],
+        server: {
+          host: null,
+          pass: null,
+          port: 587,
+          user: null
+        }
+      },
       file: {
         name: 'sherlock.log',
         directory: process.cwd()
       }
     };
-
     const opts = Object.assign({}, DEFAULT_OPTIONS, options);
-
-    this.winston = new (winston.Logger)({
+    const winstonOptions = {
       transports: [
         new (winston.transports.Console)({
           colorize: true,
@@ -42,7 +52,13 @@ class Logger
           timestamp: true
         })
       ]
-    });
+    };
+
+    if (opts.email.enabled)
+    {
+      winstonOptions.transports.push(new WinstonEmailTransport(opts.email));
+    }
+    this.winston = new (winston.Logger)(winstonOptions);
   }
   debug(message, data = null)
   {

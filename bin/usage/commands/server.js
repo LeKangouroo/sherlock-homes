@@ -11,6 +11,36 @@ module.exports = {
       default: 8080,
       describe: 'The port exposed by the webservice',
       type: 'number'
+    },
+    'log-email': {
+      default: false,
+      describe: 'Enables email logging',
+      type: 'boolean'
+    },
+    'log-email-from': {
+      describe: 'The sender of the email for logging',
+      type: 'string'
+    },
+    'log-email-host': {
+      describe: 'The SMTP server host',
+      type: 'string'
+    },
+    'log-email-port': {
+      default: 587,
+      describe: 'The SMTP server port',
+      type: 'number'
+    },
+    'log-email-pass': {
+      describe: 'The SMTP server password',
+      type: 'string'
+    },
+    'log-email-to': {
+      describe: 'The recipients of the email for logging',
+      type: 'array'
+    },
+    'log-email-user': {
+      describe: 'The SMTP server username',
+      type: 'string'
     }
   }
 };
