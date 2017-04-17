@@ -1,4 +1,3 @@
-const AbstractException = require('./abstract-exception');
 const nodemailer = require('nodemailer');
 const winston = require('winston');
 
