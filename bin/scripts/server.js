@@ -111,7 +111,20 @@ function init({ logger, server })
   });
 }
 
-const logger = Logger.getInstance();
+const logger = Logger.getInstance({
+  email: {
+    enabled: argv.logEmail,
+    from: argv.logEmailFrom,
+    to: argv.logEmailTo,
+    server: {
+      host: argv.logEmailHost,
+      pass: argv.logEmailPass,
+      port: argv.logEmailPort,
+      user: argv.logEmailUser
+    }
+  }
+});
+
 const server = new Websocket.Server({
   host:               argv.host,
   port:               argv.port,
