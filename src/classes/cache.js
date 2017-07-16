@@ -58,16 +58,14 @@ class Cache
       });
     });
   }
-  static connect(options = { host: '127.0.0.1', port: 6379 })
+  static connect()
   {
-    const { host, port } = options;
-    const client = redis.createClient(port, host);
+    return new Promise((resolve, reject) => {
 
-    client.on('ready', () => {
-      this.instance = new Cache(client);
-    });
-    client.on('error', (err) => {
-      throw new CacheException('Failed to connect to the cache server', err);
+      const client = redis.createClient();
+
+      client.on('ready', () => resolve(client));
+      client.on('error', (err) => reject(new CacheException('Failed to connect to the cache server', err)));
     });
   }
   static getInstance()
@@ -76,9 +74,16 @@ class Cache
 
       if (this.instance)
       {
-        resolve(this.instance);
+        return resolve(this.instance);
       }
-      reject(new CacheException('No cache client instance available yet. You need to use the connect method first.'));
+      Cache
+        .connect()
+        .then((client) => {
+
+          this.instance = new Cache(client);
+          resolve(this.instance);
+        })
+        .catch((err) => reject(err));
     });
   }
   static hashKeyId(id)
@@ -93,7 +98,5 @@ class Cache
     return (typeof this.instance !== 'undefined');
   }
 }
-
-Cache.instance = null;
 
 module.exports = Cache;

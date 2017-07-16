@@ -1,5 +1,4 @@
 const argv = require('../usage/usage').argv;
-const Cache = require('../../src/classes/cache');
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
 const Logger = require('../../src/classes/logger');
@@ -130,11 +129,6 @@ const server = new Websocket.Server({
   host:               argv.host,
   port:               argv.port,
   perMessageDeflate:  false,
-});
-
-Cache.connect({
-  host: argv.cacheServerHost,
-  port: argv.cacheServerPort
 });
 
 init({ logger, server });
