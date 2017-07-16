@@ -7,7 +7,7 @@ webservice:
   environment:
     - CACHE_SERVER_HOST=cache
     - CACHE_SERVER_PORT=6379
-    - HOST=sherlock-homes.io
+    - HOST=0.0.0.0
     - LOG_EMAIL_FROM=from
     - LOG_EMAIL_TO=to
     - LOG_EMAIL_SMTP_HOST=smtp_host
