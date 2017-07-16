@@ -5,8 +5,8 @@ module.exports = {
   command: 'server',
   describe: 'Runs a webservice with a REST API',
   builder: {
-    cacheServerHost: cacheServerHost,
-    cacheServerPort: cacheServerPort,
+    'cache-server-host': cacheServerHost,
+    'cache-server-port': cacheServerPort,
     host: {
       default: 'localhost',
       describe: 'The host of the webservice',

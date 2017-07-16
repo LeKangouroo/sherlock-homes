@@ -5,8 +5,8 @@ module.exports = {
   command: 'search',
   describe: 'Runs a search',
   builder: {
-    cacheServerHost: cacheServerHost,
-    cacheServerPort: cacheServerPort,
+    'cache-server-host': cacheServerHost,
+    'cache-server-port': cacheServerPort,
     'delimiter': {
       default: ';',
       demand: true,
