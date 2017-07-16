@@ -62,7 +62,7 @@ class Cache
   {
     return new Promise((resolve, reject) => {
 
-      const client = redis.createClient();
+      const client = redis.createClient(this.config.port, this.config.host);
 
       client.on('ready', () => resolve(client));
       client.on('error', (err) => reject(new CacheException('Failed to connect to the cache server', err)));
@@ -97,6 +97,17 @@ class Cache
   {
     return (typeof this.instance !== 'undefined');
   }
+  static setHost(host)
+  {
+    this.config.host = host;
+  }
+  static setPort(port)
+  {
+    this.config.port = port;
+  }
 }
+
+Cache.config = { host: '127.0.0.1', port: 6379 };
+Cache.instance = null;
 
 module.exports = Cache;
