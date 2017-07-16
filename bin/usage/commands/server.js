@@ -1,7 +1,12 @@
+const cacheServerHost = require('./options/cache-server-host');
+const cacheServerPort = require('./options/cache-server-port');
+
 module.exports = {
   command: 'server',
   describe: 'Runs a webservice with a REST API',
   builder: {
+    'cache-server-host': cacheServerHost,
+    'cache-server-port': cacheServerPort,
     host: {
       default: 'localhost',
       describe: 'The host of the webservice',

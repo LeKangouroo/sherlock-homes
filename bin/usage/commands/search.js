@@ -1,7 +1,12 @@
+const cacheServerHost = require('./options/cache-server-host');
+const cacheServerPort = require('./options/cache-server-port');
+
 module.exports = {
   command: 'search',
   describe: 'Runs a search',
   builder: {
+    'cache-server-host': cacheServerHost,
+    'cache-server-port': cacheServerPort,
     'delimiter': {
       default: ';',
       demand: true,

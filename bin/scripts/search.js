@@ -24,6 +24,9 @@ function fail(error)
 
 try
 {
+  Cache.setHost(argv.cacheServerHost);
+  Cache.setPort(argv.cacheServerPort);
+
   const sc = new SearchCriteria({
     maxPrice: argv.maxPrice,
     minSurfaceArea: argv.minSurface,
