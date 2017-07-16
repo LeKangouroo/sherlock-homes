@@ -1,8 +1,10 @@
 #!/bin/bash
 
-redis-server &
 sherlock server \
-  --host $HOST \
+  --cache-server-host=$CACHE_SERVER_HOST \
+  --cache-server-port=$CACHE_SERVER_PORT \
+  --host=$HOST \
+  --port=$PORT \
   --log-email \
   --log-email-from=$LOG_EMAIL_FROM \
   --log-email-to=$LOG_EMAIL_TO \

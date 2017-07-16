@@ -1,0 +1,20 @@
+cache:
+  image: redis:4
+  volumes:
+    - ./cache/data:/data
+webservice:
+  build: ./webservice
+  environment:
+    - CACHE_SERVER_HOST=cache
+    - CACHE_SERVER_PORT=6379
+    - HOST=sherlock-homes.io
+    - LOG_EMAIL_FROM=from
+    - LOG_EMAIL_TO=to
+    - LOG_EMAIL_SMTP_HOST=smtp_host
+    - LOG_EMAIL_SMTP_USER=smtp_user
+    - LOG_EMAIL_SMTP_PASS=smtp_pass
+    - PORT=8080
+  links:
+    - cache
+  ports:
+    - "8080:8080"
