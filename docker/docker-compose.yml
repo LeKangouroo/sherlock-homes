@@ -1,5 +1,6 @@
 cache:
   image: redis:4
+  restart: always
   volumes:
     - ./cache/data:/data
 webservice:
@@ -18,3 +19,4 @@ webservice:
     - cache
   ports:
     - "8080:8080"
+  restart: always
