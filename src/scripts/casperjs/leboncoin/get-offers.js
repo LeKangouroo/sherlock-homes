@@ -8,7 +8,9 @@ const casper = require('casper').create({
     height: 1080
   },
   retryTimeout: 500,
-  waitTimeout: 10000
+  waitTimeout: 10000,
+  logLevel: 'debug',
+  verbose: true
 });
 
 var currentURL;
@@ -33,29 +35,27 @@ casper.eachThen(urls, function(response) {
   currentURL = response.data;
   casper.open(currentURL).then(function() {
 
-    casper.waitForSelector('.Footer', function() {
+    casper.waitForSelector('#footer', function() {
 
       var offer = casper.evaluate(function(searchCriteria) {
 
-        var REGEXP_AGENCY_FEES = /Honoraires charge locataire (\([^)]+\) )?((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
-        var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
-        var REGEXP_PRICE = /((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
+        var REGEXP_IS_NOT_FURNISHED = /non meuble/i;
         var REGEXP_SURFACE_AREA = /([0-9]+\.?[0-9]*) m2/;
         var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
 
-        var agencyFeesMatches = document.querySelector('.OfferDetails-content').textContent.match(REGEXP_AGENCY_FEES);
-        var agencyFeesIndex = (agencyFeesMatches[1].charAt(0) === '(') ? 2 : 1;
-        var agencyFees = Number(agencyFeesMatches[agencyFeesIndex].replace(' ', ''));
-        var isFurnished = REGEXP_IS_FURNISHED.test(document.querySelector('.OfferDetails-content').innerText.replace(/[éÉ]/g, 'e'));
-        var price = Number(document.querySelector('.OfferTop-price').textContent.match(REGEXP_PRICE)[1].replace(' ', ''));
-        var surfaceArea = Number(document.querySelector('.OfferTop-col--right').innerText.match(REGEXP_SURFACE_AREA)[1]);
-        var zipCode = document.querySelector('.OfferTop-loc').innerText.match(REGEXP_ZIP_CODE)[1];
+        var isFurnishedXPath = '//*[contains(concat(" ", normalize-space(@class), " "), " properties ")]/*[contains(concat(" ", normalize-space(@class), " "), " line ")]//*[contains(concat(" ", normalize-space(@class), " "), " property ") and text()="Meublé / Non meublé"]/following-sibling::span';
+        var isFurnishedElement = document.evaluate(isFurnishedXPath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        var isFurnished = !REGEXP_IS_NOT_FURNISHED.test(isFurnishedElement.innerText.replace(/[éÉ]/g, 'e'));
+        var price = Number(document.querySelector('.properties *[itemprop="price"]').getAttribute('content'));
+        var surfaceAreaXPath = '//*[contains(concat(" ", normalize-space(@class), " "), " properties ")]/*[contains(concat(" ", normalize-space(@class), " "), " line ")]//*[contains(concat(" ", normalize-space(@class), " "), " property ") and text()="Surface"]/following-sibling::span';
+        var surfaceArea = Number(document.evaluate(surfaceAreaXPath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.innerText.match(REGEXP_SURFACE_AREA)[1]);
+        var zipCode = document.querySelector('.properties *[itemprop="address"]').innerText.match(REGEXP_ZIP_CODE)[1];
 
         return {
-          agencyFees: agencyFees,
+          agencyFees: null,
           isFurnished: isFurnished,
           price: price,
-          source: "FONCIA",
+          source: "LEBONCOIN",
           surfaceArea: surfaceArea,
           type: searchCriteria.offerType,
           url: window.location.href,
