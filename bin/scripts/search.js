@@ -41,7 +41,7 @@ try
   const search = Promise.all([
     se1.findOffers(sc),
     se2.findOffers(sc),
-    se3.findOffers(sc)
+    se3.findOffers(sc),
     se4.findOffers(sc)
   ]);
 
