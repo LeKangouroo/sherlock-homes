@@ -1,6 +1,6 @@
 {
   "name": "sherlock-homes",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Un crawler web pour de recherches d'offres immobilières",
   "main": "index.js",
   "bin": {
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/itadakimas/project-crawler.git"
+    "url": "git+https://github.com/itadakimas/sherlock-homes.git"
   },
   "author": "Itadakimas",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/itadakimas/project-crawler/issues"
+    "url": "https://github.com/itadakimas/sherlock-homes/issues"
   },
-  "homepage": "https://github.com/itadakimas/project-crawler#readme",
+  "homepage": "https://github.com/itadakimas/sherlock-homes#readme",
   "dependencies": {
     "casperjs": "1.1.4",
     "json2csv": "3.7.3",
