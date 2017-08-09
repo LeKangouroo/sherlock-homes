@@ -101,7 +101,7 @@ class Offer
   }
   static areAgencyFeesValid(agencyFees)
   {
-    return (isNumber(agencyFees) && isFinite(agencyFees) && agencyFees >= 0);
+    return (agencyFees === null || (isNumber(agencyFees) && isFinite(agencyFees) && agencyFees >= 0));
   }
   static isFurnishedFlagValid(isFurnished)
   {

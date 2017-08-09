@@ -3,6 +3,7 @@ const Cache = require('../../src/classes/cache');
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
 const json2csv = require('json2csv');
+const LeBonCoinSearchEngine = require('../../src/classes/leboncoin-search-engine');
 const Logger = require('../../src/classes/logger');
 const Offer = require('../../src/classes/offer');
 const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
@@ -36,10 +37,12 @@ try
   const se1 = new FonciaSearchEngine();
   const se2 = new OrpiSearchEngine();
   const se3 = new Century21SearchEngine();
+  const se4 = new LeBonCoinSearchEngine();
   const search = Promise.all([
     se1.findOffers(sc),
     se2.findOffers(sc),
-    se3.findOffers(sc)
+    se3.findOffers(sc),
+    se4.findOffers(sc)
   ]);
 
   search
