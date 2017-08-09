@@ -2,6 +2,7 @@ const argv = require('../usage/usage').argv;
 const Cache = require('../../src/classes/cache');
 const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
 const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
+const LeBonCoinSearchEngine = require('../../src/classes/leboncoin-search-engine');
 const Logger = require('../../src/classes/logger');
 const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
 const SearchCriteria = require('../../src/classes/search-criteria');
@@ -14,6 +15,7 @@ function findOffers(client, message)
   const searchEngines = [
     new Century21SearchEngine(),
     new FonciaSearchEngine(),
+    new LeBonCoinSearchEngine(),
     new OrpiSearchEngine()
   ];
 

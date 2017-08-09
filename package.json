@@ -20,10 +20,11 @@
   },
   "homepage": "https://github.com/itadakimas/project-crawler#readme",
   "dependencies": {
-    "casperjs": "1.1.3",
+    "casperjs": "1.1.4",
     "json2csv": "3.7.3",
     "lodash": "4.17.4",
     "mocha": "3.2.0",
+    "moment": "2.18.1",
     "nodemailer": "4.0.1",
     "redis": "2.7.1",
     "validator": "6.2.1",
