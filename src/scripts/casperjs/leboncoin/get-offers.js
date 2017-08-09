@@ -41,7 +41,7 @@ casper.eachThen(urls, function(response) {
 
         var REGEXP_IS_NOT_FURNISHED = /non meuble/i;
         var REGEXP_SURFACE_AREA = /([0-9]+\.?[0-9]*) m2/;
-        var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
+        var REGEXP_ZIP_CODE = /([0-9]{5})/;
 
         var isFurnishedXPath = '//*[contains(concat(" ", normalize-space(@class), " "), " properties ")]/*[contains(concat(" ", normalize-space(@class), " "), " line ")]//*[contains(concat(" ", normalize-space(@class), " "), " property ") and text()="Meublé / Non meublé"]/following-sibling::span';
         var isFurnishedElement = document.evaluate(isFurnishedXPath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -49,13 +49,13 @@ casper.eachThen(urls, function(response) {
         var price = Number(document.querySelector('.properties *[itemprop="price"]').getAttribute('content'));
         var surfaceAreaXPath = '//*[contains(concat(" ", normalize-space(@class), " "), " properties ")]/*[contains(concat(" ", normalize-space(@class), " "), " line ")]//*[contains(concat(" ", normalize-space(@class), " "), " property ") and text()="Surface"]/following-sibling::span';
         var surfaceArea = Number(document.evaluate(surfaceAreaXPath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.innerText.match(REGEXP_SURFACE_AREA)[1]);
-        var zipCode = document.querySelector('.properties *[itemprop="address"]').innerText.match(REGEXP_ZIP_CODE)[1];
+        var zipCode = document.querySelector('.properties *[itemprop="address"]').textContent.trim().match(REGEXP_ZIP_CODE)[1];
 
         return {
           agencyFees: null,
           isFurnished: isFurnished,
           price: price,
-          source: "LEBONCOIN",
+          source: "Leboncoin",
           surfaceArea: surfaceArea,
           type: searchCriteria.offerType,
           url: window.location.href,
@@ -65,6 +65,7 @@ casper.eachThen(urls, function(response) {
 
       if (offer)
       {
+        offer.agencyFees = null;
         casper.echo(JSON.stringify({ type: 'offer', data: offer }));
       }
     });
