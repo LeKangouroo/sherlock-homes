@@ -38,7 +38,7 @@ casper.eachThen(urls, function(response) {
       var offer = casper.evaluate(function(searchCriteria) {
 
         var REGEXP_AGENCY_FEES = /Honoraires charge locataire (\([^)]+\) )?((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
-        var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
+        var REGEXP_IS_FURNISHED = /\bmeubl(é|e){1}e?s?\b/i;
         var REGEXP_PRICE = /((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
         var REGEXP_SURFACE_AREA = /([0-9]+\.?[0-9]*) m2/;
         var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;

@@ -84,7 +84,8 @@ casper.then(function() {
 
   // TODO: add support of property types in the SearchCriteria class (i.e. flat, house, garage, etc.)
   const values = {
-    '#searchForm_type_bien_0': true,
+    '#searchForm_type_bien_0': true, // TODO: set this to true if we are searching an appartment
+    '#searchForm_type_bien_3': true, // TODO: set this to true if we are searching a furnished appartment
     '#searchForm_surface_min': searchCriteria.minSurfaceArea,
     '#searchForm_prix_max': searchCriteria.maxPrice
   };
