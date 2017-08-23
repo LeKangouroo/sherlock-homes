@@ -45,7 +45,7 @@ class SearchEngine extends AbstractObservable
 
       const DEFAULT_OPTIONS = {
         args: null,
-        interruptOnError: true
+        interruptOnError: false
       };
 
       options = Object.assign({}, DEFAULT_OPTIONS, options);
