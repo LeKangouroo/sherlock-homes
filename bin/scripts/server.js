@@ -36,7 +36,7 @@ function findOffers(client, message)
     });
   });
 
-  const promises = searchEngines.map((se) => se.findOffers(sc, { interruptOnError: false }));
+  const promises = searchEngines.map((se) => se.findOffers(sc));
 
   Promise.all(promises).then((offers) => {
 
