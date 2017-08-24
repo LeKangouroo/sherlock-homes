@@ -9,6 +9,7 @@ module.exports = {
     'max-price': require('./options/max-price'),
     'min-surface': require('./options/min-surface'),
     'offer-type': require('./options/offer-type'),
+    'sources': require('./options/sources'),
     'zip-codes': require('./options/zip-codes')
   }
 };
