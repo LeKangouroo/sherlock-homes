@@ -12,6 +12,7 @@ const casper = require('casper').create({
 var currentURL;
 
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
+const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.on('error', function(message, trace) {
@@ -31,7 +32,7 @@ casper.eachThen(urls, function(response) {
   currentURL = response.data;
   casper.open(currentURL).then(function() {
 
-    var offer = casper.evaluate(function(searchCriteria){
+    var offer = casper.evaluate(function(searchCriteria, searchEngine){
 
       var REGEXP_AGENCY_FEES = /Honoraires charge locataire : ((((\d{1,3})( \d{3})*)|(\d+))(,\d+)?) €/;
       var REGEXP_IS_FURNISHED = /\bmeubl(é|e){1}e?s?\b/i;
@@ -48,13 +49,13 @@ casper.eachThen(urls, function(response) {
         agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1].replace(',', '.').replace(' ', '')),
         isFurnished: REGEXP_IS_FURNISHED.test(description),
         price: Number(priceDetails.match(REGEXP_PRICE)[1].replace(',', '.').replace(' ', '')),
-        source: "Century 21",
+        source: searchEngine.name,
         surfaceArea: Number(offerDetails.match(REGEXP_SURFACE_AREA)[1].replace(',', '.')),
         type: searchCriteria.offerType,
         url: window.location.href,
         zipCode: locationDetails.match(REGEXP_ZIPCODE)[1]
       };
-    }, searchCriteria);
+    }, searchCriteria, searchEngine);
 
     if (offer)
     {
