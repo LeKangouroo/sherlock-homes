@@ -12,6 +12,7 @@ const casper = require('casper').create({
 var currentURL;
 
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
+const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.start();
@@ -31,7 +32,7 @@ casper.each(urls, function(casper, link) {
   currentURL = link;
   casper.thenOpen(currentURL, function() {
 
-    var offer = casper.evaluate(function(searchCriteria) {
+    var offer = casper.evaluate(function(searchCriteria, searchEngine) {
 
       var REGEXP_AGENCY_FEES = /Honoraires TTC à la charge du locataire : ((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?) €/;
       var REGEXP_IS_FURNISHED = /\bmeubl(é|e){1}e?s?\b/i;
@@ -48,13 +49,13 @@ casper.each(urls, function(casper, link) {
         agencyFees: Number(offerDetails.match(REGEXP_AGENCY_FEES)[1].replace(' ', '')),
         isFurnished: REGEXP_IS_FURNISHED.test(description),
         price: Number(priceDetails.match(REGEXP_PRICE)[1].replace(' ', '')),
-        source: "ORPI",
+        source: searchEngine.name,
         surfaceArea: Number(locationDetails.match(REGEXP_SURFACE_AREA)[1]),
         type: searchCriteria.offerType,
         url: window.location.href,
         zipCode: window.location.href.match(REGEXP_ZIPCODE)[1]
       };
-    }, searchCriteria);
+    }, searchCriteria, searchEngine);
 
     if (offer)
     {
