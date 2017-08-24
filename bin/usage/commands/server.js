@@ -1,51 +1,17 @@
-const cacheServerHost = require('./options/cache-server-host');
-const cacheServerPort = require('./options/cache-server-port');
-
 module.exports = {
   command: 'server',
   describe: 'Runs a webservice with a REST API',
   builder: {
-    'cache-server-host': cacheServerHost,
-    'cache-server-port': cacheServerPort,
-    host: {
-      default: 'localhost',
-      describe: 'The host of the webservice',
-      type: 'string'
-    },
-    port: {
-      default: 8080,
-      describe: 'The port exposed by the webservice',
-      type: 'number'
-    },
-    'log-email': {
-      default: false,
-      describe: 'Enables email logging',
-      type: 'boolean'
-    },
-    'log-email-from': {
-      describe: 'The sender of the email for logging',
-      type: 'string'
-    },
-    'log-email-host': {
-      describe: 'The SMTP server host',
-      type: 'string'
-    },
-    'log-email-port': {
-      default: 587,
-      describe: 'The SMTP server port',
-      type: 'number'
-    },
-    'log-email-pass': {
-      describe: 'The SMTP server password',
-      type: 'string'
-    },
-    'log-email-to': {
-      describe: 'The recipients of the email for logging',
-      type: 'array'
-    },
-    'log-email-user': {
-      describe: 'The SMTP server username',
-      type: 'string'
-    }
+    'cache-server-host': require('./options/cache-server-host'),
+    'cache-server-port': require('./options/cache-server-port'),
+    'host': require('./options/host'),
+    'log-email': require('./options/log-email'),
+    'log-email-from': require('./options/log-email-from'),
+    'log-email-host': require('./options/log-email-host'),
+    'log-email-pass': require('./options/log-email-pass'),
+    'log-email-port': require('./options/log-email-port'),
+    'log-email-to': require('./options/log-email-to'),
+    'log-email-user': require('./options/log-email-user'),
+    'port': require('./options/port')
   }
 };
