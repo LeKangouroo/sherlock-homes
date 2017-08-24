@@ -14,6 +14,7 @@ const casper = require('casper').create({
 var currentURL;
 
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
+const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.start();
@@ -35,10 +36,10 @@ casper.eachThen(urls, function(response) {
 
     casper.waitForSelector('.Footer', function() {
 
-      var offer = casper.evaluate(function(searchCriteria) {
+      var offer = casper.evaluate(function(searchCriteria, searchEngine) {
 
         var REGEXP_AGENCY_FEES = /Honoraires charge locataire (\([^)]+\) )?((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
-        var REGEXP_IS_FURNISHED = /\bmeuble\b/i;
+        var REGEXP_IS_FURNISHED = /\bmeubl(é|e){1}e?s?\b/i;
         var REGEXP_PRICE = /((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
         var REGEXP_SURFACE_AREA = /([0-9]+\.?[0-9]*) m2/;
         var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
@@ -55,13 +56,13 @@ casper.eachThen(urls, function(response) {
           agencyFees: agencyFees,
           isFurnished: isFurnished,
           price: price,
-          source: "FONCIA",
+          source: searchEngine.name,
           surfaceArea: surfaceArea,
           type: searchCriteria.offerType,
           url: window.location.href,
           zipCode: zipCode
         };
-      }, searchCriteria);
+      }, searchCriteria, searchEngine);
 
       if (offer)
       {

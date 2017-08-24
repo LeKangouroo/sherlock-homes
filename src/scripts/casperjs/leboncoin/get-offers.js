@@ -16,6 +16,7 @@ const casper = require('casper').create({
 var currentURL;
 
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
+const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.start();
@@ -37,7 +38,7 @@ casper.eachThen(urls, function(response) {
 
     casper.waitForSelector('#footer', function() {
 
-      var offer = casper.evaluate(function(searchCriteria) {
+      var offer = casper.evaluate(function(searchCriteria, searchEngine) {
 
         var REGEXP_IS_NOT_FURNISHED = /non meuble/i;
         var REGEXP_SURFACE_AREA = /([0-9]+\.?[0-9]*) m2/;
@@ -55,13 +56,13 @@ casper.eachThen(urls, function(response) {
           agencyFees: null,
           isFurnished: isFurnished,
           price: price,
-          source: "Leboncoin",
+          source: searchEngine.name,
           surfaceArea: surfaceArea,
           type: searchCriteria.offerType,
           url: window.location.href,
           zipCode: zipCode
         };
-      }, searchCriteria);
+      }, searchCriteria, searchEngine);
 
       if (offer)
       {

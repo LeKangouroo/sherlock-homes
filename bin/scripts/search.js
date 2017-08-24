@@ -1,13 +1,10 @@
 const argv = require('../usage/usage').argv;
 const Cache = require('../../src/classes/cache');
-const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
-const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
 const json2csv = require('json2csv');
-const LeBonCoinSearchEngine = require('../../src/classes/leboncoin-search-engine');
 const Logger = require('../../src/classes/logger');
 const Offer = require('../../src/classes/offer');
-const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
 const SearchCriteria = require('../../src/classes/search-criteria');
+const searchEngines = require('../../src/modules/search-engines');
 
 function cacheServerDisconnect()
 {
@@ -34,18 +31,15 @@ try
     offerType: argv.offerType === 'purchase' ? Offer.types.PURCHASE : Offer.types.RENT,
     zipCodes: argv.zipCodes.map(String)
   });
-  const se1 = new FonciaSearchEngine();
-  const se2 = new OrpiSearchEngine();
-  const se3 = new Century21SearchEngine();
-  const se4 = new LeBonCoinSearchEngine();
-  const search = Promise.all([
-    se1.findOffers(sc),
-    se2.findOffers(sc),
-    se3.findOffers(sc),
-    se4.findOffers(sc)
-  ]);
 
-  search
+  const activeSearchEngines = searchEngines
+    .getList()
+    .filter(se => argv.sources.indexOf(se.source) > -1);
+
+  const promises = activeSearchEngines
+    .map(se => (new se.engine()).findOffers(sc));
+
+  Promise.all(promises)
     .then((offers) => {
 
       offers = [].concat.apply([], offers);

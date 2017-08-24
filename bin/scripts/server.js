@@ -1,25 +1,21 @@
 const argv = require('../usage/usage').argv;
 const Cache = require('../../src/classes/cache');
-const Century21SearchEngine = require('../../src/classes/century-21-search-engine');
-const FonciaSearchEngine = require('../../src/classes/foncia-search-engine');
-const LeBonCoinSearchEngine = require('../../src/classes/leboncoin-search-engine');
 const Logger = require('../../src/classes/logger');
-const OrpiSearchEngine = require('../../src/classes/orpi-search-engine');
 const SearchCriteria = require('../../src/classes/search-criteria');
+const searchEngines = require('../../src/modules/search-engines');
 const ServerException = require('../../src/classes/server-exception');
 const Websocket = require('ws');
 
 function findOffers(client, message)
 {
   const sc = new SearchCriteria(message.data);
-  const searchEngines = [
-    new Century21SearchEngine(),
-    new FonciaSearchEngine(),
-    new LeBonCoinSearchEngine(),
-    new OrpiSearchEngine()
-  ];
 
-  searchEngines.forEach((se) => {
+  const activeSearchEngines = searchEngines
+    .getList()
+    .filter(se => message.data.sources.indexOf(se.source) > -1)
+    .map(se => new se.engine());
+
+  activeSearchEngines.forEach((se) => {
 
     se.addObserver('error', (error) => {
 
@@ -36,7 +32,7 @@ function findOffers(client, message)
     });
   });
 
-  const promises = searchEngines.map((se) => se.findOffers(sc, { interruptOnError: false }));
+  const promises = activeSearchEngines.map(se => se.findOffers(sc));
 
   Promise.all(promises).then((offers) => {
 
