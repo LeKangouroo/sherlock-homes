@@ -13,6 +13,7 @@ const casper = require('casper').create({
 
 var currentURL;
 
+const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 const urls = JSON.parse(casper.cli.options['urls']);
@@ -36,21 +37,44 @@ casper.eachThen(urls, function(response) {
 
     casper.waitForSelector('.Footer', function() {
 
-      var offer = casper.evaluate(function(searchCriteria, searchEngine) {
+      var offer = casper.evaluate(function(searchCriteria, searchEngine, offerTypes) {
 
-        var REGEXP_AGENCY_FEES = /Honoraires charge locataire (\([^)]+\) )?((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
+        /*
+         * Common
+         */
+
+        var REGEXP_AGENCY_FEES;
         var REGEXP_IS_FURNISHED = /\bmeubl(é|e){1}e?s?\b/i;
         var REGEXP_PRICE = /((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
         var REGEXP_SURFACE_AREA = /([0-9]+\.?[0-9]*) m2/;
         var REGEXP_ZIP_CODE = /\(([0-9]{5})\)/;
 
-        var agencyFeesMatches = document.querySelector('.OfferDetails-content').textContent.match(REGEXP_AGENCY_FEES);
-        var agencyFeesIndex = (agencyFeesMatches[1].charAt(0) === '(') ? 2 : 1;
-        var agencyFees = Number(agencyFeesMatches[agencyFeesIndex].replace(' ', ''));
+        var agencyFeesMatches;
+        var agencyFeesIndex;
+        var agencyFees;
         var isFurnished = REGEXP_IS_FURNISHED.test(document.querySelector('.OfferDetails-content').innerText.replace(/[éÉ]/g, 'e'));
         var price = Number(document.querySelector('.OfferTop-price').textContent.match(REGEXP_PRICE)[1].replace(' ', ''));
         var surfaceArea = Number(document.querySelector('.OfferTop-col--right').innerText.match(REGEXP_SURFACE_AREA)[1]);
         var zipCode = document.querySelector('.OfferTop-loc').innerText.match(REGEXP_ZIP_CODE)[1];
+
+        /*
+         * Rent
+         */
+        if (searchCriteria.offerType === offerTypes.RENT)
+        {
+          REGEXP_AGENCY_FEES = /Honoraires charge locataire (\([^)]+\) )?((((\d{1,3})( \d{3})*)|(\d+))(\.\d+)?)/;
+          agencyFeesMatches = document.querySelector('.OfferDetails-content').textContent.match(REGEXP_AGENCY_FEES);
+          agencyFeesIndex = (agencyFeesMatches[1].charAt(0) === '(') ? 2 : 1;
+          agencyFees = Number(agencyFeesMatches[agencyFeesIndex].replace(' ', ''));
+        }
+
+        /*
+         * Purchase
+         */
+        if (searchCriteria.offerType === offerTypes.PURCHASE)
+        {
+          agencyFees = false; // NOTE: we can't use null inside casper.evaluate because it gets replaced by an empty string
+        }
 
         return {
           agencyFees: agencyFees,
@@ -62,10 +86,14 @@ casper.eachThen(urls, function(response) {
           url: window.location.href,
           zipCode: zipCode
         };
-      }, searchCriteria, searchEngine);
+      }, searchCriteria, searchEngine, offerTypes);
 
       if (offer)
       {
+        if (offer.agencyFees === false)
+        {
+          offer.agencyFees = null;
+        }
         casper.echo(JSON.stringify({ type: 'offer', data: offer }));
       }
     });
