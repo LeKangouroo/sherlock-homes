@@ -82,10 +82,6 @@ class SearchEngine extends AbstractObservable
 
           urlsCasperScript.addObserver('data', (message) => {
 
-            if (message === null)
-            {
-              return;
-            }
             if (message.type === 'error')
             {
               return fail(new SearchEngineException(this, 'error during offers URLs parsing', message.data));
@@ -133,10 +129,6 @@ class SearchEngine extends AbstractObservable
 
             offersCasperScript.addObserver('data', (message) => {
 
-              if (message === null)
-              {
-                return;
-              }
               if (message.type === 'error')
               {
                 return fail(new SearchEngineException(this, 'error during offer analysis', message.data));

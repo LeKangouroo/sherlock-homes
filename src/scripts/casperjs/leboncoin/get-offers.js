@@ -1,4 +1,6 @@
 const casper = require('casper').create({
+  verbose: true,
+  logLevel: "debug",
   pageSettings: {
     loadImages: false,
     loadPlugins: false
@@ -8,9 +10,7 @@ const casper = require('casper').create({
     height: 1080
   },
   retryTimeout: 500,
-  waitTimeout: 10000,
-  logLevel: 'debug',
-  verbose: true
+  waitTimeout: 10000
 });
 
 var currentURL;
