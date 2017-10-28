@@ -36,9 +36,9 @@ describe('Foncia', function() {
 
         if (message.type === 'error')
         {
-          return done(new SearchEngineException(se, message.data.message, message.data.trace));
+          throw new SearchEngineException(se, message.data.message, message.data.trace);
         }
-        if (message.type === 'urls')
+        else if (message.type === 'urls')
         {
           urls = urls.concat(message.data);
         }
@@ -48,7 +48,7 @@ describe('Foncia', function() {
 
         if (code > 0)
         {
-          return done(new SearchEngineException(se, `get-urls casper script exited with code = ${code}`));
+          throw new SearchEngineException(se, `get-urls casper script exited with code = ${code}`);
         }
         assert(urls.length > 0);
         done();
@@ -82,9 +82,9 @@ describe('Foncia', function() {
 
         if (message.type === 'error')
         {
-          return done(new SearchEngineException(se, message.data.message, message.data.trace));
+          throw new SearchEngineException(se, message.data.message, message.data.trace);
         }
-        if (message.type === 'urls')
+        else if (message.type === 'urls')
         {
           urls = urls.concat(message.data);
         }
@@ -94,7 +94,7 @@ describe('Foncia', function() {
 
         if (code > 0)
         {
-          return done(new SearchEngineException(se, `get-urls casper script exited with code = ${code}`));
+          throw new SearchEngineException(se, `get-urls casper script exited with code = ${code}`);
         }
         assert(urls.length === 0);
         done();
@@ -132,9 +132,9 @@ describe('Foncia', function() {
 
         if (message.type === 'error')
         {
-          return done(new SearchEngineException(se, message.data.message, message.data.trace));
+          throw new SearchEngineException(se, message.data.message, message.data.trace);
         }
-        if (message.type === 'urls')
+        else if (message.type === 'urls')
         {
           urls = urls.concat(message.data);
         }
@@ -144,7 +144,7 @@ describe('Foncia', function() {
 
         if (code > 0)
         {
-          return done(new SearchEngineException(se, `get-urls casper script exited with code = ${code}`));
+          throw new SearchEngineException(se, `get-urls casper script exited with code = ${code}`);
         }
 
         args.push(`--urls=${JSON.stringify(urls)}`);
@@ -155,9 +155,9 @@ describe('Foncia', function() {
 
           if (message.type === 'error')
           {
-            return done(new SearchEngineException(se, message.data.message, message.data.trace));
+            throw new SearchEngineException(se, message.data.message, message.data.trace);
           }
-          if (message.type === 'offer')
+          else if (message.type === 'offer')
           {
             offers.push(message.data);
           }
@@ -167,7 +167,7 @@ describe('Foncia', function() {
 
           if (code > 0)
           {
-            return done(new SearchEngineException(se, `get-offers casper script exited with code = ${code}`));
+            throw new SearchEngineException(se, `get-offers casper script exited with code = ${code}`);
           }
           assert.strictEqual(offers.length, urls.length);
           done();
