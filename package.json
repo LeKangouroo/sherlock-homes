@@ -3,6 +3,9 @@
   "version": "1.7.1",
   "description": "Un crawler web pour de recherches d'offres immobilières",
   "main": "index.js",
+  "engines": {
+    "node": "6.*"
+  },
   "bin": {
     "sherlock": "./bin/cli.js"
   },
