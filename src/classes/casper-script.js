@@ -23,7 +23,12 @@ class CasperScript extends AbstractObservable
 
     childProcess.stdout.on('data', (buffer) => {
 
-      this.notifyObservers('data', CasperScript.parseStreamBuffer(buffer));
+      const data = CasperScript.parseStreamBuffer(buffer);
+
+      if (data !== null)
+      {
+        this.notifyObservers('data', data);
+      }
     });
 
     childProcess.on('exit', (code) => {

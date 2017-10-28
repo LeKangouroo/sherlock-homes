@@ -73,7 +73,7 @@ describe('Century21', function() {
 
           if (message.type === 'error')
           {
-            return done(new SearchEngineException(se, message.data.message, message.data.trace));
+            throw new SearchEngineException(se, message.data.message, message.data.trace);
           }
           if (message.type === 'urls')
           {
@@ -85,7 +85,7 @@ describe('Century21', function() {
 
           if (code > 0)
           {
-            return done(new SearchEngineException(se, `get-urls casper script exited with code = ${code}`));
+            throw new SearchEngineException(se, `get-urls casper script exited with code = ${code}`);
           }
           assert(urls.length > 0);
           done();
@@ -132,7 +132,7 @@ describe('Century21', function() {
 
           if (message.type === 'error')
           {
-            return done(new SearchEngineException(se, message.data.message, message.data.trace));
+            throw new SearchEngineException(se, message.data.message, message.data.trace);
           }
           if (message.type === 'urls')
           {
@@ -144,7 +144,7 @@ describe('Century21', function() {
 
           if (code > 0)
           {
-            return done(new SearchEngineException(se, `get-urls casper script exited with code = ${code}`));
+            throw new SearchEngineException(se, `get-urls casper script exited with code = ${code}`);
           }
           assert(urls.length === 0);
           done();
@@ -195,7 +195,7 @@ describe('Century21', function() {
 
           if (message.type === 'error')
           {
-            return done(new SearchEngineException(se, message.data.message, message.data.trace));
+            throw new SearchEngineException(se, message.data.message, message.data.trace);
           }
           if (message.type === 'urls')
           {
@@ -207,7 +207,7 @@ describe('Century21', function() {
 
           if (code > 0)
           {
-            return done(new SearchEngineException(se, `get-urls casper script exited with code = ${code}`));
+            throw new SearchEngineException(se, `get-urls casper script exited with code = ${code}`);
           }
 
           args.push(`--urls=${JSON.stringify(urls)}`);
@@ -218,7 +218,7 @@ describe('Century21', function() {
 
             if (message.type === 'error')
             {
-              return done(new SearchEngineException(se, message.data.message, message.data.trace));
+              throw new SearchEngineException(se, message.data.message, message.data.trace);
             }
             if (message.type === 'offer')
             {
@@ -230,7 +230,7 @@ describe('Century21', function() {
 
             if (code > 0)
             {
-              return done(new SearchEngineException(se, `get-offers casper script exited with code = ${code}`));
+              throw new SearchEngineException(se, `get-offers casper script exited with code = ${code}`);
             }
             assert.strictEqual(offers.length, urls.length);
             done();
