@@ -1,6 +1,6 @@
 {
   "name": "sherlock-homes",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Un crawler web pour de recherches d'offres immobilières",
   "main": "index.js",
   "bin": {
