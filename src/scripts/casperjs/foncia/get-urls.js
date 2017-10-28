@@ -14,6 +14,7 @@ const casper = require('casper').create({
 const offerTypes = JSON.parse(casper.cli.options['offer-types']);
 const searchCriteria = JSON.parse(casper.cli.options['search-criteria']);
 const searchEngine = JSON.parse(casper.cli.options['search-engine']);
+const pageURI = (searchCriteria.offerType === offerTypes.PURCHASE) ? "achat" : "location";
 
 function getOfferLinks(linksSelector, nextButtonSelector)
 {
@@ -54,18 +55,8 @@ casper.on('page.error', function(message, trace) {
   console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
 });
 
-// Loads search engine's website url
-casper.start(searchEngine.websiteUrl);
-
-// Goes to the section of the website corresponding to the offer type
-if (searchCriteria.offerType === offerTypes.PURCHASE)
-{
-  casper.thenClick('.Btn--achat');
-}
-else
-{
-  casper.thenClick('.Btn--location');
-}
+// Loads search engine's website url corresponding to the offer type
+casper.start(searchEngine.websiteUrl + "/" + pageURI);
 
 // Selects search area
 casper.eachThen(searchCriteria.zipCodes, function(response) {
