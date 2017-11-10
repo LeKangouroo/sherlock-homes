@@ -4,7 +4,7 @@
   "description": "Un crawler web pour de recherches d'offres immobilières",
   "main": "index.js",
   "engines": {
-    "node": "6.*"
+    "node": "8.*"
   },
   "bin": {
     "sherlock": "./bin/cli.js"
