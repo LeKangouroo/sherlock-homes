@@ -153,17 +153,7 @@ casper.on('page.error', function(message, trace) {
 });
 
 // Loads search engine's website url
-casper.start(searchEngine.websiteUrl);
-
-// Goes to the section of the website corresponding to the offer type
-if (isForPurchase)
-{
-  casper.thenClick('#footer a[title="Ventes immobilières"]');
-}
-else
-{
-  casper.thenClick('#footer a[title="Locations"]');
-}
+casper.start(searchEngine.websiteUrl + (isForPurchase ? "/ventes_immobilieres/offres" : "/locations/offres"));
 
 casper.waitUntilVisible(searchFieldSelector, function() {
 
