@@ -43,24 +43,23 @@ class SearchEngine extends AbstractObservable
         return reject(new SearchEngineException(this, 'invalid argument. expected an instance of the SearchCriteria'));
       }
 
-      const DEFAULT_OPTIONS = { args: null, interruptOnError: false };
-      const opts = Object.assign({}, DEFAULT_OPTIONS, options);
-      const createFail = ({ reject, options, notify }) => (error) => {
+      const opts = Object.assign({}, { args: [], interruptOnError: false }, options);
+      const createFail = ({ reject, notify }) => (error, forceInterrupt = opts.interruptOnError) => {
 
         notify('error', error);
-        if (options.interruptOnError)
+        if (forceInterrupt)
         {
           reject(error);
         }
       };
-      const fail = createFail({ notify: this.notifyObservers.bind(this), reject: reject, options: opts });
+      const fail = createFail({ notify: this.notifyObservers.bind(this), reject: reject });
       const cache = await Cache.getInstance();
       const defaultArgs = [
         `--offer-types=${JSON.stringify(Offer.types)}`,
         `--search-criteria=${JSON.stringify(searchCriteria)}`,
         `--search-engine=${JSON.stringify(this)}`
       ];
-      const args = (Array.isArray(opts.args)) ? defaultArgs.concat(opts.args) : defaultArgs;
+      const args = defaultArgs.concat(opts.args);
       const searchEngineName = this.getName();
       const newOffersUrls = [];
       const offers = [];
@@ -100,9 +99,8 @@ class SearchEngine extends AbstractObservable
         if (code !== 0)
         {
           fail(new SearchEngineException(this, "error during execution of get-urls CasperJS script"));
-          return;
         }
-        if (newOffersUrls.length === 0)
+        else if (newOffersUrls.length === 0)
         {
           resolve(offers);
           return;
@@ -130,7 +128,7 @@ class SearchEngine extends AbstractObservable
 
           if (code !== 0)
           {
-            fail(new SearchEngineException(this, 'error during execution of get-offers CasperJS script'));
+            fail(new SearchEngineException(this, 'error during execution of get-offers CasperJS script'), true);
             return;
           }
           resolve(offers);

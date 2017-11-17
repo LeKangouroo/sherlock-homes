@@ -1,4 +1,8 @@
 const casper = require('casper').create({
+  onError: function onError(casper, message, trace) {
+
+    console.log(JSON.stringify({ type: "error", data: { message: message, trace: trace } }));
+  },
   verbose: true,
   logLevel: "debug",
   pageSettings: {
@@ -21,16 +25,6 @@ const searchEngine = JSON.parse(casper.cli.options['search-engine']);
 const urls = JSON.parse(casper.cli.options['urls']);
 
 casper.start();
-
-casper.on('error', function(message, trace) {
-
-  console.log(JSON.stringify({ type: 'error', data: { message: message, url: currentURL, trace: trace } }));
-});
-
-casper.on('page.error', function(message, trace) {
-
-  console.log(JSON.stringify({ type: 'error', data: { message: message, url: currentURL, trace: trace } }));
-});
 
 casper.eachThen(urls, function(response) {
 

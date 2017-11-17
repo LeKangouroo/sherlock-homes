@@ -3,6 +3,10 @@
  */
 
 const casper = require('casper').create({
+  onError: function onError(casper, message, trace) {
+
+    console.log(JSON.stringify({ type: "error", data: { message: message, trace: trace } }));
+  },
   verbose: true,
   logLevel: "debug",
   pageSettings: {
@@ -142,16 +146,6 @@ function parseBase10Integer(str)
  * Processing
  */
 
-casper.on('error', function(message, trace) {
-
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
-});
-
-casper.on('page.error', function(message, trace) {
-
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
-});
-
 // Loads search engine's website url
 casper.start(searchEngine.websiteUrl + (isForPurchase ? "/ventes_immobilieres/offres" : "/locations/offres"));
 
@@ -160,14 +154,17 @@ casper.waitUntilVisible(searchFieldSelector, function() {
   // Selects search area
   casper.eachThen(searchCriteria.zipCodes, function(response) {
 
-    const zipCode = response.data;
+    if (casper.visible(searchFieldSelector))
+    {
+      const zipCode = response.data;
 
-    this.sendKeys(searchFieldSelector, zipCode, { keepFocus: true });
-    this.waitUntilVisible('.location-list.visible', function() {
+      this.sendKeys(searchFieldSelector, zipCode, { keepFocus: true });
+      this.waitUntilVisible('.location-list.visible', function() {
 
-      this.sendKeys(searchFieldSelector, casper.page.event.key.Down);
-      this.sendKeys(searchFieldSelector, casper.page.event.key.Enter);
-    });
+        this.sendKeys(searchFieldSelector, casper.page.event.key.Down);
+        this.sendKeys(searchFieldSelector, casper.page.event.key.Enter);
+      });
+    }
   });
 });
 
