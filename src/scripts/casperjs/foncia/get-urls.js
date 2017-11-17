@@ -1,4 +1,8 @@
 const casper = require('casper').create({
+  onError: function onError(casper, message, trace) {
+
+    console.log(JSON.stringify({ type: "error", data: { message: message, trace: trace } }));
+  },
   verbose: true,
   logLevel: "debug",
   pageSettings: {
@@ -45,16 +49,6 @@ function getOfferLinks(linksSelector, nextButtonSelector)
   }
 }
 
-casper.on('error', function(message, trace) {
-
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
-});
-
-casper.on('page.error', function(message, trace) {
-
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
-});
-
 // Loads search engine's website url corresponding to the offer type
 casper.start(searchEngine.websiteUrl + "/" + pageURI);
 
@@ -86,18 +80,12 @@ casper.then(function() {
 });
 
 // Scraps informations
-casper.waitForSelector('.TeaserOffer',
-  function() {
+casper.waitForSelector('.TeaserOffer', function() {
 
-    casper.then(function() {
+  casper.then(function() {
 
-      getOfferLinks('.TeaserOffer .TeaserOffer-title a', '.Pagination a:last-child');
-    });
-  },
-  function onTimeout() {
-
-    casper.log('No offer found in Foncia website', 'info');
-  }
-);
+    getOfferLinks('.TeaserOffer .TeaserOffer-title a', '.Pagination a:last-child');
+  });
+});
 
 casper.run();

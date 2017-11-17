@@ -1,4 +1,8 @@
 const casper = require('casper').create({
+  onError: function onError(casper, message, trace) {
+
+    console.log(JSON.stringify({ type: "error", data: { message: message, trace: trace } }));
+  },
   verbose: true,
   logLevel: "debug",
   pageSettings: {
@@ -45,16 +49,6 @@ function getOfferLinks(linksSelector, nextButtonSelector)
     });
   }
 }
-
-casper.on('error', function(message, trace) {
-
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
-});
-
-casper.on('page.error', function(message, trace) {
-
-  console.log(JSON.stringify({ type: 'error', data: { message: message, trace: trace } }));
-});
 
 // Goes to the section of the website corresponding to the offer type
 url += (searchCriteria.offerType === offerTypes.PURCHASE) ? '/acheter' : '/louer';
@@ -117,18 +111,12 @@ casper.then(function() {
 });
 
 // Scraps offers informations
-casper.waitForSelector('.resultLayout-estateList',
-  function() {
+casper.waitForSelector('.resultLayout-estateList', function() {
 
-    casper.then(function() {
+  casper.then(function() {
 
-      getOfferLinks('.resultLayout-estateList .column .estateItem', null);
-    });
-  },
-  function onTimeout() {
-
-    casper.log('No offer found in Orpi website');
-  }
-);
+    getOfferLinks('.resultLayout-estateList .column .estateItem', null);
+  });
+});
 
 casper.run();
